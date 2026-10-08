@@ -270,11 +270,10 @@
   .wheel-screen {
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: calc(8px + var(--sat)) 16px 0;
+    justify-content: space-between;
+    padding: calc(8px + var(--sat)) 16px calc(8px + var(--sab));
     background: var(--black);
     z-index: 20;
-    overflow: hidden;
   }
 
   .header {
@@ -317,15 +316,14 @@
     width: 100%;
     min-height: 0;
     position: relative;
-    overflow: visible;
   }
 
   .wheel-wrap {
     position: relative;
-    width: 130vw;
-    height: 130vw;
-    max-width: none;
-    max-height: none;
+    width: min(88vw, calc(100dvh - 170px));
+    height: min(88vw, calc(100dvh - 170px));
+    max-width: 480px;
+    max-height: 480px;
   }
 
   .wheel-wrap::before {
@@ -339,14 +337,14 @@
 
   .pointer {
     position: absolute;
-    top: -20px; left: 50%;
+    top: -16px; left: 50%;
     transform: translateX(-50%);
     z-index: 20;
     width: 0; height: 0;
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-top: 40px solid var(--green);
-    filter: drop-shadow(0 0 18px rgba(130,253,71,0.9));
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top: 30px solid var(--green);
+    filter: drop-shadow(0 0 14px rgba(130,253,71,0.8));
     transition: filter 0.08s;
   }
   .pointer.tick {
@@ -364,7 +362,7 @@
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 30;
-    width: 140px; height: 140px;
+    width: 110px; height: 110px;
     border-radius: 50%;
     background: var(--black);
     border: 4px solid rgba(130,253,71,0.5);
@@ -407,33 +405,9 @@
     justify-content: center;
     padding: 40px 24px;
     text-align: center;
-    background: rgba(2,1,2,0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--black);
     z-index: 30;
   }
-
-  .result-card {
-    background: var(--off-white);
-    border-radius: 24px;
-    padding: 32px 24px;
-    max-width: 320px;
-    width: 90%;
-    color: var(--black);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  }
-  .result-card .r-icon { font-size: 56px; margin-bottom: 12px; }
-  .result-card .r-phrase { font-size: 9px; letter-spacing: 3px; color: rgba(2,1,2,0.4); margin-bottom: 4px; }
-  .result-card .r-label { font-size: 10px; letter-spacing: 4px; color: rgba(2,1,2,0.5); margin-bottom: 6px; }
-  .result-card .r-name { font-size: clamp(20px, 6vw, 30px); font-weight: 700; color: var(--black); line-height: 1.15; margin-bottom: 10px; }
-  .result-card .r-desc { font-size: 12px; color: rgba(2,1,2,0.7); line-height: 1.6; margin-bottom: 20px; }
-  .result-card .r-code { background: rgba(130,253,71,0.15); border: 1.5px dashed var(--green); color: var(--green); }
-  .result-card .r-staff { color: var(--orange); border-color: var(--orange); }
-  .result-card .r-player { color: rgba(2,1,2,0.3); }
-
-  /* Winner variant */
-  .result-screen.winner .result-card { background: linear-gradient(160deg, #FFF5ED 0%, var(--off-white) 100%); }
-  .result-screen.winner .result-card .r-name { color: var(--orange); }
 
   .result-screen .r-icon {
     font-size: 64px;
@@ -525,7 +499,10 @@
     animation: fadeSlide 0.5s 0.8s both;
   }
 
-  /* Winner variant (overridden by .result-card styles above) */
+  /* Winner variant */
+  .result-screen.winner { background: linear-gradient(180deg, #1a0600 0%, var(--black) 50%); }
+  .result-screen.winner .r-name { color: var(--orange); text-shadow: 0 0 50px rgba(236,110,37,0.35); }
+  .result-screen.winner .r-phrase { color: var(--orange); }
 
   /* ─── ALREADY PLAYED ─── */
   .played-screen {
@@ -771,16 +748,14 @@
 
 <!-- SCREEN 3: RESULT (PERMANENT) -->
 <div id="resultScreen" class="screen result-screen">
-  <div class="result-card">
-    <div class="r-icon" id="rIcon"></div>
-    <div class="r-phrase" id="rPhrase"></div>
-    <div class="r-label" id="rLabel"></div>
-    <div class="r-name" id="rName"></div>
-    <div class="r-desc" id="rDesc"></div>
-    <div class="r-code" id="rCode" onclick="copyCode(this)"></div>
-    <div class="r-staff">MUESTRA ESTA PANTALLA AL EQUIPO SALENTINO</div>
-    <div class="r-player" id="rPlayer"></div>
-  </div>
+  <div class="r-icon" id="rIcon"></div>
+  <div class="r-phrase" id="rPhrase"></div>
+  <div class="r-label" id="rLabel"></div>
+  <div class="r-name" id="rName"></div>
+  <div class="r-desc" id="rDesc"></div>
+  <div class="r-code" id="rCode" onclick="copyCode(this)"></div>
+  <div class="r-staff">MUESTRA ESTA PANTALLA AL EQUIPO SALENTINO</div>
+  <div class="r-player" id="rPlayer"></div>
 </div>
 
 <!-- SCREEN 4: ALREADY PLAYED -->
@@ -815,7 +790,6 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════
 // BRAND
@@ -1038,27 +1012,21 @@ function drawWheel(angle) {
     ctx.textBaseline = 'middle';
     ctx.fillText(p.icon, R - 42, 0);
 
-    ctx.font = 'bold 22px "Space Mono", monospace';
+    ctx.font = 'bold 26px "Space Mono", monospace';
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
     var lines = p.label.split('\n');
-    var lineH = 26;
-    var textR = R * 0.52;
-    var startOff = -(lines.length - 1) * lineH / 2;
-
-    ctx.save();
-    ctx.rotate(-Math.PI / 2);
+    var lineH = 30;
+    var textX = R * 0.50;
+    var startY = -(lines.length - 1) * lineH / 2;
 
     ctx.fillStyle = (p.textColor === '#020102') ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.4)';
     for (var li = 0; li < lines.length; li++) {
-      ctx.fillText(lines[li], startOff + li * lineH + 1.5, textR + 1.5);
+      ctx.fillText(lines[li], textX + 1.5, startY + li * lineH + 1.5);
     }
     ctx.fillStyle = p.textColor;
     for (var li = 0; li < lines.length; li++) {
-      ctx.fillText(lines[li], startOff + li * lineH, textR);
+      ctx.fillText(lines[li], textX, startY + li * lineH);
     }
-
-    ctx.restore();
 
     ctx.restore();
   }
@@ -1278,35 +1246,41 @@ function spin(prize, playerName) {
   var targetAngle = (3 * Math.PI / 2) - targetSegCenter;
   var fullRotations = 7 + Math.floor(Math.random() * 3);
   var totalSpin = fullRotations * 2 * Math.PI + (targetAngle - (currentAngle % (2 * Math.PI)));
+
   var startAngle = currentAngle;
-  var finalAngle = startAngle + totalSpin;
+  var duration = 5000 + Math.random() * 1500;
+  var startTime = performance.now();
   var pointer = document.getElementById('pointer');
   var lastSegment = -1;
 
-  var spinObj = { angle: startAngle };
-  gsap.to(spinObj, {
-    angle: finalAngle,
-    duration: 5 + Math.random() * 1.5,
-    ease: "power4.out",
-    onUpdate: function() {
-      currentAngle = spinObj.angle;
-      drawWheel(currentAngle);
-      // tick sound on segment change
-      var normAngle = ((3 * Math.PI / 2) - currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-      var seg = Math.floor(normAngle / ARC) % SEGMENTS;
-      if (seg !== lastSegment) {
-        lastSegment = seg;
-        pointer.classList.add('tick');
-        if (navigator.vibrate) navigator.vibrate(10);
-        setTimeout(function() { pointer.classList.remove('tick'); }, 50);
-      }
-    },
-    onComplete: function() {
+  function easeOut(t) {
+    return 1 - Math.pow(1 - t, 4.5);
+  }
+
+  function animate(now) {
+    var elapsed = now - startTime;
+    var t = Math.min(elapsed / duration, 1);
+    currentAngle = startAngle + totalSpin * easeOut(t);
+    drawWheel(currentAngle);
+
+    var normAngle = ((3 * Math.PI / 2) - currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+    var seg = Math.floor(normAngle / ARC) % SEGMENTS;
+    if (seg !== lastSegment) {
+      lastSegment = seg;
+      pointer.classList.add('tick');
+      if (navigator.vibrate) navigator.vibrate(10);
+      setTimeout(function() { pointer.classList.remove('tick'); }, 50);
+    }
+
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    } else {
       isSpinning = false;
       hub.classList.remove('spinning');
       showResult(prize, playerName);
     }
-  });
+  }
+  requestAnimationFrame(animate);
 }
 
 // ═══════════════════════════════════════════════
@@ -1315,9 +1289,8 @@ function spin(prize, playerName) {
 
 function showResult(prize, playerName) {
   var isWinner = prize.id === 'entrada';
-  // Don't hide wheel screen — show result as overlay on top
+  hideAllScreens();
   var screen = document.getElementById('resultScreen');
-  screen.classList.remove('winner');
   screen.classList.add('active');
   if (isWinner) screen.classList.add('winner');
 
