@@ -362,24 +362,20 @@
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 15;
-    width: 74px; height: 74px;
+    width: 90px; height: 90px;
     border-radius: 50%;
     background: var(--black);
-    border: 2.5px solid rgba(130,253,71,0.35);
+    border: 3px solid rgba(130,253,71,0.4);
     display: flex; align-items: center; justify-content: center;
     box-shadow:
-      0 0 20px rgba(130,253,71,0.15),
-      inset 0 0 20px rgba(130,253,71,0.03);
+      0 0 20px rgba(130,253,71,0.2),
+      inset 0 0 20px rgba(130,253,71,0.05);
+    overflow: hidden;
   }
-  .center-hub .hub-icon {
-    font-size: 28px;
-  }
-  .center-hub.spinning .hub-icon {
-    animation: pulseSpin 1s ease infinite;
-  }
-  @keyframes pulseSpin {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
+  .center-hub .hub-gif {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
   }
 
   .footer {
@@ -738,7 +734,7 @@
       <div class="pointer" id="pointer"></div>
       <canvas id="wheelCanvas"></canvas>
       <div class="center-hub" id="centerHub">
-        <span class="hub-icon">&#9733;</span>
+        <img class="hub-gif" src="https://cdn.shopify.com/s/files/1/0881/9127/1187/files/giphy-2.gif?v=1771602008" alt="Salentino" />
       </div>
     </div>
   </div>
