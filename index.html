@@ -792,6 +792,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════
 // BRAND
@@ -1250,39 +1251,33 @@ function spin(prize, playerName) {
   var totalSpin = fullRotations * 2 * Math.PI + (targetAngle - (currentAngle % (2 * Math.PI)));
 
   var startAngle = currentAngle;
-  var duration = 5000 + Math.random() * 1500;
-  var startTime = performance.now();
+  var finalAngle = startAngle + totalSpin;
   var pointer = document.getElementById('pointer');
   var lastSegment = -1;
 
-  function easeOut(t) {
-    return 1 - Math.pow(1 - t, 4.5);
-  }
-
-  function animate(now) {
-    var elapsed = now - startTime;
-    var t = Math.min(elapsed / duration, 1);
-    currentAngle = startAngle + totalSpin * easeOut(t);
-    drawWheel(currentAngle);
-
-    var normAngle = ((3 * Math.PI / 2) - currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-    var seg = Math.floor(normAngle / ARC) % SEGMENTS;
-    if (seg !== lastSegment) {
-      lastSegment = seg;
-      pointer.classList.add('tick');
-      if (navigator.vibrate) navigator.vibrate(10);
-      setTimeout(function() { pointer.classList.remove('tick'); }, 50);
-    }
-
-    if (t < 1) {
-      requestAnimationFrame(animate);
-    } else {
+  var spinObj = { angle: startAngle };
+  gsap.to(spinObj, {
+    angle: finalAngle,
+    duration: 5 + Math.random() * 1.5,
+    ease: 'power4.out',
+    onUpdate: function() {
+      currentAngle = spinObj.angle;
+      drawWheel(currentAngle);
+      var normAngle = ((3 * Math.PI / 2) - currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+      var seg = Math.floor(normAngle / ARC) % SEGMENTS;
+      if (seg !== lastSegment) {
+        lastSegment = seg;
+        pointer.classList.add('tick');
+        if (navigator.vibrate) navigator.vibrate(10);
+        setTimeout(function() { pointer.classList.remove('tick'); }, 50);
+      }
+    },
+    onComplete: function() {
       isSpinning = false;
       hub.classList.remove('spinning');
       showResult(prize, playerName);
     }
-  }
-  requestAnimationFrame(animate);
+  });
 }
 
 // ═══════════════════════════════════════════════
