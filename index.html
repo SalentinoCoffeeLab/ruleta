@@ -811,11 +811,10 @@ function sendToSheet(leadData) {
     fetch(SHEET_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(leadData)
     }).catch(function() {
-      // Silently fail — prize already shown, data saved locally
-      console.log('Sheet sync failed — will retry not implemented (offline)');
+      console.log('Sheet sync failed');
     });
   } catch(e) {}
 }
