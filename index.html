@@ -858,8 +858,8 @@ var PRIZES = [
   { id: 'desc20',   label: '20% DCTO\nBOLETERIA', icon: '\uD83D\uDD25', color: '#224FD1', textColor: '#EFFFFE', desc: 'Codigo exclusivo para Ritvales 2026.', code: 'RITUAL20', weight: 15, daily_limit: 20 },
   { id: 'sticker',  label: 'STICKER\nEXCLUSIVO',  icon: '\u2726',  color: '#7D3BED', textColor: '#EFFFFE', desc: 'Reclamalo ahora con el equipo.', code: null, weight: 15, daily_limit: 50 },
   { id: 'coldbrew', label: 'COLD BREW\nGRATIS',   icon: '\uD83E\uDDCA', color: '#82FD47', textColor: '#020102', desc: 'Redime ahora en el carrito Salentino.', code: null, weight: 10, daily_limit: 15 },
-  { id: 'entrada',  label: 'ENTRADA\nDOBLE',      icon: '\uD83C\uDF89', color: '#FF4B43', textColor: '#EFFFFE', desc: 'Ganaste 2 entradas a Ritvales 2026. Reclama con el equipo ahora.', code: null, weight: 2, daily_limit: 2 },
-  { id: 'rifa',     label: 'ENTRAS A\nLA RIFA',   icon: '\uD83C\uDFB0', color: '#EFFFFE', textColor: '#020102', desc: 'Quedas inscrito en la rifa semanal de entradas dobles.', code: null, weight: 13, daily_limit: 999 },
+  { id: 'entrada',  label: 'ENTRADA\nSINGLE',      icon: '\uD83C\uDF89', color: '#FF4B43', textColor: '#EFFFFE', desc: 'Ganaste 1 entrada Single Anytime a Ritvales 2026. Reclama con el equipo ahora.', code: null, weight: 2, daily_limit: 2 },
+  { id: 'rifa',     label: 'ENTRAS A\nLA RIFA',   icon: '\uD83C\uDFB0', color: '#EFFFFE', textColor: '#020102', desc: 'Quedas inscrito en la rifa semanal de una entrada Single Anytime.', code: null, weight: 13, daily_limit: 999 },
 ];
 
 var SEGMENTS = PRIZES.length;
@@ -1343,7 +1343,7 @@ function updateCounter() {
   var left = entradaPrize.daily_limit - (globalState.prizes['entrada'] || 0);
   var el = document.getElementById('counterDisplay');
   if (left > 0) {
-    el.textContent = left + ' entrada' + (left > 1 ? 's' : '') + ' doble' + (left > 1 ? 's' : '') + ' disponible' + (left > 1 ? 's' : '');
+    el.textContent = left + ' entrada' + (left > 1 ? 's' : '') + ' single' + (left > 1 ? 's' : '') + ' disponible' + (left > 1 ? 's' : '');
   } else {
     el.textContent = 'Entradas agotadas hoy';
     el.style.color = '#FF4B43';
