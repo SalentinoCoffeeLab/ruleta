@@ -367,9 +367,7 @@
     <div class="r-name" id="rName"></div>
     <div class="r-divider" id="rDivider"></div>
     <div class="r-desc" id="rDesc"></div>
-    <div id="rDeliverWrap" style="display:none;">
-      <button class="btn-deliver" id="btnDeliver" onclick="handleDeliver()">MARCAR ENTREGADO</button>
-    </div>
+    <div id="rDeliverWrap" style="display:none;"></div>
     <div id="rTuboletaWrap" style="display:none;">
       <div class="tuboleta-form" id="tuboletaForm">
         <div class="form-group">
@@ -402,9 +400,7 @@
     <div class="played-label">TU PREMIO</div>
     <div class="played-prize" id="playedPrize"></div>
     <div class="played-desc" id="playedDesc"></div>
-    <div id="playedDeliverWrap" style="display:none;">
-      <button class="btn-deliver" id="btnPlayedDeliver" onclick="handlePlayedDeliver()">MARCAR ENTREGADO</button>
-    </div>
+    <div id="playedDeliverWrap" style="display:none;"></div>
     <div id="playedTuboletaMsg" class="tuboleta-note" style="display:none;"></div>
     <div class="played-divider"></div>
     <div class="played-player" id="playedPlayer"></div>
@@ -500,11 +496,11 @@ var CUPO_DESC20 = 8;
 var CUPO_ENTRADA = 3;
 
 var PRIZES = [
-  { id: 'cafe',    label: 'BEBIDA\nCALIENTE', icon: '☕', color: '#EC6E25', textColor: '#EFFFFE', desc: 'Muestra esta pantalla en el carrito y te lo entregamos ahí mismo.', weight: 30, daily_limit: CUPO_CAFE, type: 'physical' },
-  { id: 'fria',    label: 'BEBIDA\nFRÍA',     icon: '🧊', color: '#82FD47', textColor: '#020102', desc: 'Muestra esta pantalla en el carrito y te lo entregamos ahí mismo.', weight: 15, daily_limit: CUPO_FRIA, type: 'physical' },
-  { id: 'collar',  label: 'COLLAR\nRITVALES', icon: '📿', color: '#7D3BED', textColor: '#EFFFFE', desc: 'Muestra esta pantalla en el carrito y te lo entregamos ahí mismo.', weight: 10, daily_limit: CUPO_COLLAR, type: 'physical' },
-  { id: 'desc20',  label: '20% DCTO\nBOLETERÍA', icon: '🔥', color: '#224FD1', textColor: '#EFFFFE', desc: 'Ganaste 20% de descuento en tu boleta de Ritvales 2026. Deja tus datos y Ritvales te envía el código.', weight: 8, daily_limit: CUPO_DESC20, type: 'tuboleta' },
-  { id: 'entrada', label: 'ENTRADA\nGENERAL',  icon: '🎉', color: '#FF4B43', textColor: '#EFFFFE', desc: 'Ganaste 1 entrada General Anytime para el domingo 1 de noviembre en Ritvales 2026. Deja tus datos y Ritvales te la envía.', weight: 3, daily_limit: CUPO_ENTRADA, type: 'tuboleta' },
+  { id: 'cafe',    label: 'BEBIDA\nCALIENTE', icon: '☕', color: '#EC6E25', textColor: '#EFFFFE', desc: 'Tu café te espera. Acércate al carrito Salentino, muestra esta pantalla y recibe tu bebida caliente.', weight: 30, daily_limit: CUPO_CAFE, type: 'physical' },
+  { id: 'fria',    label: 'BEBIDA\nFRÍA',     icon: '🧊', color: '#82FD47', textColor: '#020102', desc: 'Refréscate con nosotros. Acércate al carrito Salentino, muestra esta pantalla y recibe tu bebida fría.', weight: 15, daily_limit: CUPO_FRIA, type: 'physical' },
+  { id: 'collar',  label: 'COLLAR\nRITVALES', icon: '📿', color: '#7D3BED', textColor: '#EFFFFE', desc: 'Llevas el ritual contigo. Acércate al carrito Salentino, muestra esta pantalla y recibe tu collar oficial Ritvales 2026.', weight: 10, daily_limit: CUPO_COLLAR, type: 'physical' },
+  { id: 'desc20',  label: '20% DCTO\nBOLETERÍA', icon: '🔥', color: '#224FD1', textColor: '#EFFFFE', desc: '20% de descuento en tu boleta para Ritvales 2026. Deja tus datos y el equipo de Ritvales te enviará tu código de descuento.', weight: 8, daily_limit: CUPO_DESC20, type: 'tuboleta' },
+  { id: 'entrada', label: 'ENTRADA\nGENERAL',  icon: '🎉', color: '#FF4B43', textColor: '#EFFFFE', desc: '1 entrada General Anytime para el domingo 1 de noviembre en Ritvales 2026. Deja tus datos y el equipo de Ritvales te la enviará.', weight: 3, daily_limit: CUPO_ENTRADA, type: 'tuboleta' },
 ];
 
 var SEGMENTS = PRIZES.length;
@@ -559,7 +555,7 @@ function showAlreadyPlayed(data) {
         btn.textContent = 'MARCAR ENTREGADO';
         btn.className = 'btn-deliver';
       }
-      document.getElementById('playedStaff').textContent = 'MUESTRA ESTA PANTALLA EN EL CARRITO';
+      document.getElementById('playedStaff').textContent = 'PRESENTA ESTA PANTALLA EN EL CARRITO SALENTINO';
       document.getElementById('playedStaff').style.display = '';
       document.getElementById('playedTuboletaMsg').style.display = 'none';
     } else {
@@ -871,7 +867,7 @@ function showResult(prize, playerName) {
   if (prize.type === 'physical') {
     deliverWrap.style.display = 'block';
     tuboletaWrap.style.display = 'none';
-    staffEl.textContent = 'MUESTRA ESTA PANTALLA EN EL CARRITO';
+    staffEl.textContent = 'PRESENTA ESTA PANTALLA EN EL CARRITO SALENTINO';
     staffEl.style.display = '';
     var btn = document.getElementById('btnDeliver');
     btn.textContent = 'MARCAR ENTREGADO';
