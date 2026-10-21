@@ -965,7 +965,7 @@ function handleDeliver() {
     btn.disabled = true;
     var played = getLocalPlayed();
     if (played) { played.delivered = true; saveLocalPlayed(played); }
-    sendToSheet({ action: 'deliver', code: currentResultCode || '', prize: currentResultPrize ? currentResultPrize.id : '', name: currentResultPlayer || '', time: new Date().toISOString() });
+    // deliver es solo client-side (no enviar al sheet)
   }
 }
 
@@ -991,7 +991,7 @@ function handlePlayedDeliver() {
     btn.disabled = true;
     var played = getLocalPlayed();
     if (played) { played.delivered = true; saveLocalPlayed(played); }
-    sendToSheet({ action: 'deliver', code: played ? played.code : '', prize: played ? played.prize : '', name: played ? played.name : '', time: new Date().toISOString() });
+    // deliver es solo client-side (no enviar al sheet)
   }
 }
 
@@ -1009,12 +1009,7 @@ function submitTuboleta() {
   var btn = document.getElementById('btnTuboleta');
   btn.disabled = true; btn.textContent = 'ENVIANDO...';
   var played = getLocalPlayed();
-  sendToSheet({
-    action: 'tuboleta', tuboName: name, tuboCedula: cedula, tuboEmail: email,
-    prize: currentResultPrize ? currentResultPrize.id : (played ? played.prize : ''),
-    playerName: currentResultPlayer || (played ? played.name : ''),
-    time: new Date().toISOString()
-  });
+  // tuboleta data solo se muestra en pantalla (no se envía al sheet)
   setTimeout(function() {
     btn.textContent = '✓ ENVIADO';
     document.getElementById('tuboConfirm').classList.add('visible');
