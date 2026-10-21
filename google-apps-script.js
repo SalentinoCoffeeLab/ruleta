@@ -5,7 +5,7 @@
 // INSTRUCCIONES:
 // 1. Abrir el Google Sheet existente (o crear uno nuevo)
 // 2. En la primera fila poner estos headers:
-//    Timestamp | Nombre | Email | WhatsApp | Codigo | Premio | Hora | Entregado | NombreCompleto | Cedula | CorreoTuboleta
+//    Timestamp | Nombre | Email | WhatsApp | Codigo | Premio | Hora
 // 3. Ir a Extensions > Apps Script
 // 4. Borrar todo el contenido y pegar ESTE archivo completo
 // 5. Click en Deploy > Manage deployments
@@ -23,52 +23,17 @@ function doPost(e) {
 
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var data = JSON.parse(e.postData.contents);
-    var action = data.action || 'lead';
 
-    if (action === 'lead') {
-      // Registro de jugada normal
-      sheet.appendRow([
-        new Date().toISOString(),
-        data.name || '',
-        data.email || '',
-        data.phone || '',
-        data.code || '',
-        data.prize || '',
-        data.time || '',
-        '',   // Entregado
-        '',   // NombreCompleto
-        '',   // Cedula
-        ''    // CorreoTuboleta
-      ]);
-
-    } else if (action === 'deliver') {
-      // Marcar premio como entregado
-      var code = (data.code || '').toUpperCase();
-      if (code) {
-        var rows = sheet.getDataRange().getValues();
-        for (var i = 1; i < rows.length; i++) {
-          if (String(rows[i][4]).toUpperCase() === code) {
-            sheet.getRange(i + 1, 8).setValue(new Date().toISOString()); // Columna H = Entregado
-            break;
-          }
-        }
-      }
-
-    } else if (action === 'saveTuboleta') {
-      // Guardar datos de TuboletaPass junto al registro existente
-      var code = (data.code || '').toUpperCase();
-      if (code) {
-        var rows = sheet.getDataRange().getValues();
-        for (var i = 1; i < rows.length; i++) {
-          if (String(rows[i][4]).toUpperCase() === code) {
-            sheet.getRange(i + 1, 9).setValue(data.nombreCompleto || '');   // Columna I
-            sheet.getRange(i + 1, 10).setValue(data.cedula || '');          // Columna J
-            sheet.getRange(i + 1, 11).setValue(data.correoTuboleta || '');  // Columna K
-            break;
-          }
-        }
-      }
-    }
+    // Registro de jugada
+    sheet.appendRow([
+      new Date().toISOString(),
+      data.name || '',
+      data.email || '',
+      data.phone || '',
+      data.code || '',
+      data.prize || '',
+      data.time || ''
+    ]);
 
     lock.releaseLock();
 
