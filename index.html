@@ -506,12 +506,17 @@ var PRIZES = [
 var SEGMENTS = PRIZES.length;
 var ARC = (2 * Math.PI) / SEGMENTS;
 
-var TODAY = (function() {
+function colNow() {
   var now = new Date();
   var utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
-  var col = new Date(utcMs - 5 * 3600000);
-  return col.toISOString().slice(0, 10);
-})();
+  return new Date(utcMs - 5 * 3600000);
+}
+function colTimestamp() {
+  var d = colNow();
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+}
+var TODAY = colNow().toISOString().slice(0, 10);
 
 function getGlobalState() {
   try {
@@ -545,16 +550,7 @@ function showAlreadyPlayed(data) {
     document.getElementById('playedPrize').textContent = prize.label.replace('\n', ' ');
     document.getElementById('playedDesc').textContent = prize.desc;
     if (prize.type === 'physical') {
-      document.getElementById('playedDeliverWrap').style.display = 'block';
-      var btn = document.getElementById('btnPlayedDeliver');
-      if (data.delivered) {
-        btn.textContent = '✓ ENTREGADO';
-        btn.className = 'btn-deliver delivered';
-        btn.disabled = true;
-      } else {
-        btn.textContent = 'MARCAR ENTREGADO';
-        btn.className = 'btn-deliver';
-      }
+      document.getElementById('playedDeliverWrap').style.display = 'none';
       document.getElementById('playedStaff').textContent = 'PRESENTA ESTA PANTALLA EN EL CARRITO SALENTINO';
       document.getElementById('playedStaff').style.display = '';
       document.getElementById('playedTuboletaMsg').style.display = 'none';
@@ -777,7 +773,7 @@ function proceedWithSpin(code, name, email, phone, serverCounts, hasServer) {
     isSubmitting = false; goBtn.disabled = false; goBtn.textContent = 'ACTIVAR RITUAL';
     return;
   }
-  var leadData = { name: name, email: email, phone: phone, code: code, prize: prize.id, time: new Date().toISOString() };
+  var leadData = { name: name, email: email, phone: phone, code: code, prize: prize.id, time: colTimestamp() };
   globalState.leads.push(leadData);
   globalState.spins++;
   globalState.prizes[prize.id] = (globalState.prizes[prize.id] || 0) + 1;

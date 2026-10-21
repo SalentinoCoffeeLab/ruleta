@@ -24,9 +24,15 @@ function doPost(e) {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var data = JSON.parse(e.postData.contents);
 
+    // Timestamp en hora Colombia (UTC-5)
+    var now = new Date();
+    var col = new Date(now.getTime() - 5 * 3600000 + now.getTimezoneOffset() * 60000);
+    var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+    var ts = col.getFullYear() + '-' + pad(col.getMonth()+1) + '-' + pad(col.getDate()) + ' ' + pad(col.getHours()) + ':' + pad(col.getMinutes()) + ':' + pad(col.getSeconds());
+
     // Registro de jugada
     sheet.appendRow([
-      new Date().toISOString(),
+      ts,
       data.name || '',
       data.email || '',
       data.phone || '',
