@@ -29,7 +29,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   html, body {
-    width: 100%; height: 100dvh;
+    width: 100%; height: 100vh; height: 100dvh;
     overflow: hidden;
     background: var(--black);
     font-family: var(--mono);
@@ -242,7 +242,7 @@
   .tuboleta-form .form-group input.error { border-color: var(--red); }
   .tuboleta-form .form-group .field-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0.4; pointer-events: none; }
 
-  .tuboleta-note { font-size: 9px; color: var(--steel); opacity: 0.5; line-height: 1.5; text-align: center; margin-top: 4px; margin-bottom: 12px; max-width: 320px; letter-spacing: 0.3px; }
+  .tuboleta-note { font-size: 11px; color: var(--orange); opacity: 0.85; line-height: 1.5; text-align: center; margin-top: 8px; margin-bottom: 14px; max-width: 320px; letter-spacing: 0.3px; padding: 8px 12px; border: 1px solid rgba(236,110,37,0.2); border-radius: 8px; background: rgba(236,110,37,0.04); }
   .btn-tuboleta { width: 100%; max-width: 320px; background: var(--cobalt); color: var(--off-white); border: none; font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 14px; border-radius: 10px; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; min-height: 48px; box-shadow: 0 4px 20px rgba(34,79,209,0.25); }
   .btn-tuboleta:active { transform: scale(0.97); }
   .btn-tuboleta:disabled { opacity: 0.4; pointer-events: none; }
@@ -508,7 +508,12 @@ var PRIZES = [
 var SEGMENTS = PRIZES.length;
 var ARC = (2 * Math.PI) / SEGMENTS;
 
-var TODAY = new Date().toISOString().slice(0, 10);
+var TODAY = (function() {
+  var now = new Date();
+  var utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  var col = new Date(utcMs - 5 * 3600000);
+  return col.toISOString().slice(0, 10);
+})();
 
 function getGlobalState() {
   try {
@@ -734,7 +739,7 @@ function submitAndSpin() {
   goBtn.textContent = 'CARGANDO...';
 
   fetchServerCounts().then(function(data) {
-    var serverCounts = (data && data.counts) ? data.counts : {};
+    var serverCounts = (data && data.prizes) ? data.prizes : {};
     var serverUsedCodes = (data && data.usedCodes) ? data.usedCodes : [];
     if (serverUsedCodes.indexOf(code) !== -1) {
       codeInput.classList.add('error');
@@ -764,7 +769,8 @@ function proceedWithSpin(code, name, email, phone, serverCounts, hasServer) {
   globalState.usedCodes.push(code);
   saveGlobalState(globalState);
   sendToSheet(leadData);
-  saveLocalPlayed({ date: TODAY, prize: prize.id, name: name, type: prize.type, delivered: false });
+  currentResultCode = code;
+  saveLocalPlayed({ date: TODAY, prize: prize.id, name: name, code: code, type: prize.type, delivered: false });
   showWheelAndSpin(name, prize);
 }
 
@@ -819,6 +825,7 @@ function spin(prize, playerName) {
 
 var currentResultPrize = null;
 var currentResultPlayer = null;
+var currentResultCode = null;
 
 function showResult(prize, playerName) {
   currentResultPrize = prize;
@@ -865,8 +872,17 @@ function showResult(prize, playerName) {
     if (played && played.name) document.getElementById('tuboName').value = played.name;
   }
 
-  // ─── GSAP Timeline ───
+  // ─── GSAP Timeline (with fallback if CDN fails) ───
   var card = document.getElementById('prizeCard');
+  if (typeof gsap === 'undefined') {
+    card.style.opacity = '1'; card.style.transform = 'none';
+    ['rIcon','rPhrase','rLabel','rName','rDesc','rDivider','rStaff','rPlayer','btnDeliver'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.style.opacity = id === 'rPlayer' ? '0.3' : '1'; el.style.transform = 'none'; }
+    });
+    if (isWinner) launchConfetti();
+    return;
+  }
   var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
   // Reset states
@@ -929,7 +945,7 @@ function handleDeliver() {
     btn.disabled = true;
     var played = getLocalPlayed();
     if (played) { played.delivered = true; saveLocalPlayed(played); }
-    sendToSheet({ action: 'deliver', prize: currentResultPrize ? currentResultPrize.id : '', name: currentResultPlayer || '', time: new Date().toISOString() });
+    sendToSheet({ action: 'deliver', code: currentResultCode || '', prize: currentResultPrize ? currentResultPrize.id : '', name: currentResultPlayer || '', time: new Date().toISOString() });
   }
 }
 
@@ -955,7 +971,7 @@ function handlePlayedDeliver() {
     btn.disabled = true;
     var played = getLocalPlayed();
     if (played) { played.delivered = true; saveLocalPlayed(played); }
-    sendToSheet({ action: 'deliver', prize: played ? played.prize : '', name: played ? played.name : '', time: new Date().toISOString() });
+    sendToSheet({ action: 'deliver', code: played ? played.code : '', prize: played ? played.prize : '', name: played ? played.name : '', time: new Date().toISOString() });
   }
 }
 
