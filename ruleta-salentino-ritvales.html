@@ -410,12 +410,36 @@
   .prize-redeem-link { font-family: var(--mono); font-size: 11px; color: rgba(239,255,254,0.4); text-decoration: underline; text-align: center; display: block; cursor: pointer; margin-top: 4px; }
   .prize-redeem-link:hover { color: rgba(239,255,254,0.7); }
 
-  /* Winner (tuboleta) variant */
+  /* Winner (tuboleta / premio mayor) variant */
   .result-screen.winner .prize-card {
-    border-color: rgba(236,110,37,0.25);
-    background: rgba(236,110,37,0.02);
+    border-color: var(--accent-color, rgba(236,110,37,0.25));
+    background: rgba(255,255,255,0.02);
   }
-  .result-screen.winner .r-label { color: var(--orange); }
+  .result-screen.winner .r-label { color: var(--accent-color, var(--orange)); }
+  .result-screen.winner .particle-glow-bg { opacity: 0.5; }
+
+  /* Cupo chip */
+  .cupo-chip {
+    display: inline-block; font-family: var(--mono); font-size: 9px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--off-white); padding: 4px 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    margin: 8px 0; opacity: 0;
+  }
+  .cupo-chip .cupo-num { color: var(--green); }
+
+  /* Tuboleta sent state */
+  .tuboleta-sent {
+    text-align: center; padding: 16px 0;
+  }
+  .tuboleta-sent .sent-icon {
+    font-family: var(--mono); font-size: 28px; color: var(--green);
+    margin-bottom: 8px;
+  }
+  .tuboleta-sent .sent-text {
+    font-family: var(--mono); font-size: 11px; color: var(--green);
+    letter-spacing: 2px; line-height: 1.6;
+  }
 
   /* ─── DELIVER BUTTON ─── */
   .btn-deliver {
@@ -644,6 +668,7 @@
     <div class="r-desc" id="rDesc"></div>
     <div class="prize-instruction" id="prizeInstruction" style="display:none;"></div>
     <div class="consolacion-code" id="consolacionCode" style="display:none;"></div>
+    <div class="cupo-chip" id="cupoChip" style="display:none;"></div>
     <div id="rDeliverWrap" style="display:none;"></div>
     <div id="rTuboletaWrap" style="display:none;">
       <div class="tuboleta-form" id="tuboletaForm">
@@ -1098,6 +1123,7 @@ function submitAndSpin() {
       }
       currentResultCode = code;
       currentGanadoEn = data.ganado_en || TODAY;
+      lastSpinCupo = (typeof data.cupo === 'number') ? data.cupo : null;
       saveLocalPlayed({ date: TODAY, prize: prize.id, name: name, code: code, type: prize.type });
       showWheelAndSpin(name, prize, currentGanadoEn);
     } else {
@@ -1261,6 +1287,7 @@ var currentResultPlayer = null;
 var currentResultCode = null;
 var currentGanadoEn = null;
 var prizeClockInterval = null;
+var lastSpinCupo = null;
 
 function colClockStr() {
   return new Intl.DateTimeFormat('es-CO', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false, timeZone: 'America/Bogota' }).format(new Date());
@@ -1398,17 +1425,21 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   var prizeCard = document.getElementById('prizeCard');
 
   // Reset elements
+  var cupoChipEl = document.getElementById('cupoChip');
   deliverWrap.style.display = 'none';
   tuboletaWrap.style.display = 'none';
   instructionEl.style.display = 'none';
   consolacionCodeEl.style.display = 'none';
+  cupoChipEl.style.display = 'none';
   glowEl.style.display = 'none';
   clockEl.classList.remove('hidden');
   prizeCard.removeAttribute('data-tab');
 
+  // All prize types get a particle glow
+  glowEl.style.display = '';
+
   if (isCounter) {
-    // Counter prizes: particle glow, pass tab, no clock
-    glowEl.style.display = '';
+    // Counter prizes: pass tab, no clock
     clockEl.classList.add('hidden');
     prizeCard.setAttribute('data-tab', prize.type === 'consolacion' ? 'DESCUENTO' : 'PASE');
 
@@ -1416,11 +1447,12 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
       instructionEl.textContent = 'MUESTRA ESTA PANTALLA';
       instructionEl.style.display = '';
     } else if (prize.type === 'consolacion') {
-      // Show discount code (the user's code serves as the coupon)
       consolacionCodeEl.textContent = currentResultCode || '---';
       consolacionCodeEl.style.display = '';
     }
   } else if (isWinner) {
+    // Premio mayor: tab label, cupo chip, tuboleta form
+    prizeCard.setAttribute('data-tab', 'PREMIO MAYOR');
     tuboletaWrap.style.display = 'block';
     document.getElementById('tuboName').value = currentResultPlayer || '';
     document.getElementById('tuboCedula').value = '';
@@ -1428,6 +1460,12 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
     document.getElementById('btnTuboleta').disabled = false;
     document.getElementById('btnTuboleta').textContent = 'ENVIAR DATOS A RITVALES';
     document.getElementById('tuboConfirm').classList.remove('visible');
+
+    // Cupo chip (remaining quota)
+    if (typeof lastSpinCupo !== 'undefined' && lastSpinCupo !== null) {
+      cupoChipEl.innerHTML = 'QUEDAN <span class="cupo-num">' + lastSpinCupo + '</span>';
+      cupoChipEl.style.display = '';
+    }
   }
 
   // Set accent color on card and glow
@@ -1440,7 +1478,7 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   if (typeof gsap === 'undefined') {
     prizeCard.style.opacity = '1'; prizeCard.style.transform = 'none';
     document.getElementById('rName').textContent = prize.title;
-    ['rLabel','rName','rDesc','rDivider','btnPlayAgain','btnShareStory','prizeInstruction','consolacionCode'].forEach(function(id) {
+    ['rLabel','rName','rDesc','rDivider','btnPlayAgain','btnShareStory','prizeInstruction','consolacionCode','cupoChip'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
     });
@@ -1454,6 +1492,9 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   if (isCounter) {
     gsap.set(['#prizeInstruction', '#consolacionCode'], { opacity: 0, y: 10 });
   }
+  if (isWinner) {
+    gsap.set(['#cupoChip'], { opacity: 0, y: 10 });
+  }
 
   tl.to(prizeCard, { opacity: 1, y: 0, scale: 1, duration: 0.6 })
     .to('#rLabel', { opacity: 0.6, y: 0, duration: 0.3 }, '-=0.1')
@@ -1463,12 +1504,15 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
     .to('#rDivider', { opacity: 1, y: 0, duration: 0.3 }, '+=0.3')
     .to('#rDesc', { opacity: 1, y: 0, duration: 0.35 }, '-=0.1');
 
-  // Counter-specific reveals
+  // Type-specific reveals
   if (prize.type === 'carrito') {
     tl.to('#prizeInstruction', { opacity: 1, y: 0, duration: 0.3 }, '-=0.05');
   } else if (prize.type === 'consolacion') {
     tl.to('#consolacionCode', { opacity: 1, y: 0, duration: 0.4 }, '-=0.05');
   } else if (isWinner) {
+    if (cupoChipEl.style.display !== 'none') {
+      tl.to('#cupoChip', { opacity: 1, y: 0, duration: 0.3 }, '-=0.05');
+    }
     gsap.set('#rTuboletaWrap', { opacity: 0, y: 15 });
     tl.to('#rTuboletaWrap', { opacity: 1, y: 0, duration: 0.4 }, '-=0.05');
   }
@@ -1492,9 +1536,14 @@ function playAgain() {
   var goBtn = document.getElementById('btnGo');
   goBtn.disabled = false; goBtn.textContent = 'GIRAR LA RULETA';
   isSubmitting = false;
+  lastSpinCupo = null;
   clearErrors();
   if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
   if (prizeClockInterval) { clearInterval(prizeClockInterval); prizeClockInterval = null; }
+  // Reset tuboleta form visibility for next play
+  document.getElementById('tuboletaForm').style.display = '';
+  document.getElementById('btnTuboleta').style.display = '';
+  document.getElementById('tuboConfirm').classList.remove('visible');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1522,12 +1571,18 @@ function submitTuboleta() {
     email: email
   }).then(function(data) {
     if (data.status === 'ok') {
-      btn.textContent = '✓ ENVIADO';
-      document.getElementById('tuboConfirm').classList.add('visible');
+      // Replace form with sent state
+      document.getElementById('tuboletaForm').style.display = 'none';
+      btn.style.display = 'none';
+      var confirm = document.getElementById('tuboConfirm');
+      confirm.innerHTML = '<div class="tuboleta-sent"><div class="sent-icon">&#10003;</div><div class="sent-text">DATOS ENVIADOS<br>Ritvales te contactar\u00e1.</div></div>';
+      confirm.classList.add('visible');
     } else if (data.error === 'ALREADY_REDEEMED') {
-      btn.textContent = 'YA ENVIADO';
-      document.getElementById('tuboConfirm').textContent = 'Ya enviaste tus datos para este premio.';
-      document.getElementById('tuboConfirm').classList.add('visible');
+      document.getElementById('tuboletaForm').style.display = 'none';
+      btn.style.display = 'none';
+      var confirm = document.getElementById('tuboConfirm');
+      confirm.innerHTML = '<div class="tuboleta-sent"><div class="sent-text">YA ENVIASTE TUS DATOS<br>Ritvales te contactar\u00e1.</div></div>';
+      confirm.classList.add('visible');
     } else {
       btn.textContent = 'ERROR — REINTENTAR';
       btn.disabled = false;
