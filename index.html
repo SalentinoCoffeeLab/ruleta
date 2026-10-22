@@ -2153,9 +2153,16 @@ document.getElementById('inputPhone').addEventListener('input', function() {
 
 document.getElementById('inputCode').addEventListener('input', function() {
   var raw = this.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-  if (raw.length > 7) raw = raw.substring(0, 7);
-  if (raw.length > 3) { this.value = raw.substring(0, 3) + '-' + raw.substring(3); }
-  else { this.value = raw; }
+  // TEST codes: allow TEST-XXX format
+  if (raw.indexOf('TEST') === 0) {
+    if (raw.length > 7) raw = raw.substring(0, 7);
+    if (raw.length > 4) { this.value = raw.substring(0, 4) + '-' + raw.substring(4); }
+    else { this.value = raw; }
+  } else {
+    if (raw.length > 7) raw = raw.substring(0, 7);
+    if (raw.length > 3) { this.value = raw.substring(0, 3) + '-' + raw.substring(3); }
+    else { this.value = raw; }
+  }
 });
 
 document.getElementById('entryScreen').addEventListener('keydown', function(e) {
