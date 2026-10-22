@@ -507,12 +507,12 @@
   .result-screen .r-desc {
     font-family: var(--grotesk); font-size: 18px; font-weight: 700;
     color: var(--off-white); line-height: 1.4; max-width: 300px;
-    margin: 0 auto 6px; opacity: 0;
+    margin: 0 auto 6px; opacity: 0; text-align: center;
     position: relative; z-index: 1;
   }
   .result-screen .r-validity {
-    font-family: var(--mono); font-size: 12px; color: #C9D3CE;
-    margin: 0 auto 16px; position: relative; z-index: 1;
+    font-family: var(--mono); font-size: 12px; line-height: 18px; color: #C9D3CE;
+    margin: 6px auto 10px; text-align: center; position: relative; z-index: 1;
   }
 
   /* ─── CUPO CHIP ─── */
@@ -1014,6 +1014,7 @@
 
   <!-- Prize description (instructions) -->
   <div class="r-desc" id="rDesc"></div>
+  <div class="r-validity" id="rValidity"></div>
 
   <!-- Cupo chip (premio mayor only) -->
   <div class="cupo-chip" id="cupoChip" style="display:none;"></div>
@@ -1238,12 +1239,12 @@ function trackEvent(event, extra) {
 // PRIZES (6 segments — server decides which one)
 // ═══════════════════════════════════════════════════════════
 var PRIZES = [
-  { id: 'cafe',        label: 'AEROPRESS',            title: 'Aeropress',           color: '#EFFFFE', textColor: '#020102', uiColor: '#EFFFFE', textOnColor: '#020102', titleSize: 28, cupo: 30, desc: 'Muestra esta pantalla en el punto Salentino. V\u00e1lido solo hoy.', type: 'mostrador' },
-  { id: 'fria',        label: 'BEBIDA FR\u00cdA',     title: 'Bebida fr\u00eda',    color: '#82FD47', textColor: '#020102', uiColor: '#82FD47', textOnColor: '#020102', titleSize: 28, cupo: 15, desc: 'Elige entre Signal, Analog o Frequency en el punto Salentino. V\u00e1lido solo hoy.', type: 'mostrador' },
-  { id: 'collar',      label: 'COLLAR\nRITVALES',     title: 'Collar Ritvales',     color: '#7D3BED', textColor: '#EFFFFE', uiColor: '#B591F7', textOnColor: '#020102', titleSize: 28, cupo: 10, desc: 'Collar oficial Ritvales 2026. Recl\u00e1malo en el punto Salentino. V\u00e1lido solo hoy.', type: 'mostrador' },
-  { id: 'desc20',      label: '20% DCTO\nBOLETER\u00cdA', title: '20 % en boletería', color: '#224FD1', textColor: '#EFFFFE', uiColor: '#6F8FF0', textOnColor: '#020102', titleSize: 24, cupo: 8,  desc: '20 % de descuento en boleter\u00eda Ritvales. Completa tus datos y te enviaremos el c\u00f3digo.', type: 'tuboleta' },
-  { id: 'entrada',     label: 'ENTRADA\nGENERAL',     title: 'Entrada general',     color: '#FF4B43', textColor: '#EFFFFE', uiColor: '#FF4B43', textOnColor: '#EFFFFE', titleSize: 24, cupo: 3,  desc: '1 entrada general para Ritvales. Completa tus datos y te la enviaremos.', type: 'tuboleta' },
-  { id: 'consolacion', label: CONSOLACION_PCT + '% DCTO\nCAF\u00c9', title: 'Descuento Salentino', color: '#AEE1F6', textColor: '#020102', uiColor: '#AEE1F6', textOnColor: '#020102', titleSize: 24, cupo: 9999, desc: CONSOLACION_PCT + ' % en caf\u00e9s especiales Salentino. V\u00e1lido por 30 d\u00edas.', type: 'mostrador' },
+  { id: 'cafe',        label: 'AEROPRESS',            title: 'Aeropress',                              color: '#EFFFFE', textColor: '#020102', uiColor: '#EFFFFE', textOnColor: '#020102', titleSize: 58, cupo: 30, desc: 'Muestra esta pantalla en Salentino y reclama tu Aeropress.', validity: 'V\u00e1lido solo hoy, hasta el cierre.', type: 'mostrador' },
+  { id: 'fria',        label: 'BEBIDA FR\u00cdA',     title: 'Bebida fr\u00eda',                       color: '#82FD47', textColor: '#020102', uiColor: '#82FD47', textOnColor: '#020102', titleSize: 52, cupo: 15, desc: 'Muestra esta pantalla en Salentino y elige tu bebida: cold brew, cold brew tonic o iced latte.', validity: 'V\u00e1lido solo hoy, hasta el cierre.', type: 'mostrador' },
+  { id: 'collar',      label: 'COLLAR\nRITVALES',     title: 'Collar Ritvales',                        color: '#7D3BED', textColor: '#EFFFFE', uiColor: '#B591F7', textOnColor: '#020102', titleSize: 52, cupo: 10, desc: 'Muestra esta pantalla en Salentino y reclama tu collar Ritvales.', validity: 'V\u00e1lido solo hoy, hasta el cierre.', type: 'mostrador' },
+  { id: 'desc20',      label: '20% DCTO\nBOLETER\u00cdA', title: '20 % en boletería Ritvales',         color: '#224FD1', textColor: '#EFFFFE', uiColor: '#6F8FF0', textOnColor: '#020102', titleSize: 44, cupo: 8,  desc: 'Ritvales te env\u00eda el c\u00f3digo de descuento a tu correo. Completa tus datos abajo.', validity: '', type: 'tuboleta' },
+  { id: 'entrada',     label: 'ENTRADA\nGENERAL',     title: 'Entrada general Ritvales',                color: '#FF4B43', textColor: '#EFFFFE', uiColor: '#FF4B43', textOnColor: '#EFFFFE', titleSize: 44, cupo: 3,  desc: 'Ritvales te env\u00eda la entrada a tu correo. Completa tus datos abajo.', validity: '', type: 'tuboleta' },
+  { id: 'consolacion', label: CONSOLACION_PCT + '% DCTO\nCAF\u00c9', title: CONSOLACION_PCT + ' % en caf\u00e9s especiales Salentino', color: '#AEE1F6', textColor: '#020102', uiColor: '#AEE1F6', textOnColor: '#020102', titleSize: 38, cupo: 9999, desc: 'Muestra esta pantalla en Salentino y aplica el descuento en tu compra de caf\u00e9.', validity: 'V\u00e1lido solo hoy, hasta el cierre.', type: 'mostrador' },
 ];
 
 var SEGMENTS = PRIZES.length;
@@ -1886,9 +1887,12 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   var pillEl = document.getElementById('prizePill');
   pillEl.textContent = isMayor ? 'PREMIO MAYOR' : 'GANASTE';
 
-  // Title + desc
+  // Title + desc + validity
   document.getElementById('rName').style.fontSize = (prize.titleSize || 28) + 'px';
   document.getElementById('rDesc').textContent = prize.desc;
+  var validityEl = document.getElementById('rValidity');
+  validityEl.textContent = prize.validity || '';
+  validityEl.style.display = prize.validity ? '' : 'none';
 
   // Glow
   var glowEl = document.getElementById('resultGlow');
@@ -1971,7 +1975,7 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
 
   var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-  gsap.set(['#resultLogoRow', '#prizePill', '#rName', '#rDesc', '#btnShareStory', '#btnPlayAgain'], { opacity: 0, y: 15 });
+  gsap.set(['#resultLogoRow', '#prizePill', '#rName', '#rDesc', '#rValidity', '#btnShareStory', '#btnPlayAgain'], { opacity: 0, y: 15 });
   if (isMostrador) gsap.set('#passBox', { opacity: 0, y: 20 });
   if (isMayor) {
     gsap.set('#mayorBox', { opacity: 0, y: 20 });
@@ -1985,6 +1989,10 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
       decodeReveal(document.getElementById('rName'), prize.title.toUpperCase());
     })
     .to('#rDesc', { opacity: 1, y: 0, duration: 0.35 }, '+=0.3');
+
+  if (prize.validity) {
+    tl.to('#rValidity', { opacity: 1, y: 0, duration: 0.25 }, '-=0.1');
+  }
 
   if (isMayor && cupoChipEl.style.display !== 'none') {
     tl.to('#cupoChip', { opacity: 1, y: 0, duration: 0.3 }, '-=0.05');
