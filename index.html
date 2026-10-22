@@ -220,7 +220,7 @@
   .hero-box .entry-title {
     font-family: var(--grotesk); font-size: clamp(32px, 8vw, 42px); font-weight: 700;
     color: var(--off-white); text-align: center;
-    margin-bottom: 4px; letter-spacing: -1px; line-height: 1;
+    margin-top: 2px; margin-bottom: 4px; letter-spacing: -1px; line-height: 1;
   }
   .hero-box .entry-sub {
     font-family: var(--mono); font-size: 12px; color: #A7B3AE;
@@ -394,15 +394,16 @@
   .wheel-section { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; position: relative; }
   .wheel-wrap {
     position: relative;
-    width: min(80vw, calc(100dvh - 380px)); height: min(80vw, calc(100dvh - 380px));
-    max-width: 320px; max-height: 320px;
+    width: min(75vw, calc(100dvh - 420px)); height: min(75vw, calc(100dvh - 420px));
+    max-width: 300px; max-height: 300px;
+    min-width: 220px; min-height: 220px;
   }
 
   .pointer {
-    position: absolute; top: -18px; left: 50%; transform: translateX(-50%); z-index: 20;
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%); z-index: 20;
     width: 0; height: 0;
-    border-left: 15px solid transparent; border-right: 15px solid transparent;
-    border-top: 30px solid var(--off-white);
+    border-left: 12px solid transparent; border-right: 12px solid transparent;
+    border-top: 24px solid var(--off-white);
     transition: border-top-color 0.08s;
   }
   .pointer.tick { border-top-color: var(--green); }
@@ -1889,8 +1890,9 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
 
   // Title + desc + validity
   var ts = prize.titleSize || 28;
-  var tsMin = Math.round(ts * 0.65);
-  document.getElementById('rName').style.fontSize = 'clamp(' + tsMin + 'px, ' + Math.round(ts / 4) + 'vw, ' + ts + 'px)';
+  var tsMin = Math.round(ts * 0.6);
+  var tsVw = (ts * 100 / 430).toFixed(1);
+  document.getElementById('rName').style.fontSize = 'clamp(' + tsMin + 'px, ' + tsVw + 'vw, ' + ts + 'px)';
   document.getElementById('rDesc').textContent = prize.desc;
   var validityEl = document.getElementById('rValidity');
   validityEl.textContent = prize.validity || '';
@@ -2267,119 +2269,141 @@ function generateStoryImage() {
   var c = document.createElement('canvas');
   c.width = W; c.height = H;
   var ctx = c.getContext('2d');
+  var prize = currentResultPrize;
+  var accent = prize.uiColor || prize.color;
+  var cx = W / 2;
+  var margin = 60;
 
   // Background
   ctx.fillStyle = '#020102';
   ctx.fillRect(0, 0, W, H);
 
-  // Scanlines
-  ctx.fillStyle = 'rgba(130,253,71,0.015)';
-  for (var y = 0; y < H; y += 4) {
-    ctx.fillRect(0, y, W, 1);
-  }
+  // Scanlines (subtle horizontal)
+  ctx.fillStyle = 'rgba(255,255,255,0.018)';
+  for (var y = 0; y < H; y += 3) { ctx.fillRect(0, y, W, 1); }
 
-  // Grid pattern (CCTV)
-  ctx.strokeStyle = 'rgba(130,253,71,0.03)';
-  ctx.lineWidth = 1;
-  for (var gx = 0; gx < W; gx += 60) {
-    ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
-  }
-  for (var gy = 0; gy < H; gy += 60) {
-    ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
-  }
-
-  // Corner brackets (CCTV frame)
-  var bLen = 80, bW = 3, margin = 40;
-  ctx.strokeStyle = 'rgba(130,253,71,0.25)';
-  ctx.lineWidth = bW;
-  // Top-left
-  ctx.beginPath(); ctx.moveTo(margin, margin + bLen); ctx.lineTo(margin, margin); ctx.lineTo(margin + bLen, margin); ctx.stroke();
-  // Top-right
-  ctx.beginPath(); ctx.moveTo(W - margin - bLen, margin); ctx.lineTo(W - margin, margin); ctx.lineTo(W - margin, margin + bLen); ctx.stroke();
-  // Bottom-left
-  ctx.beginPath(); ctx.moveTo(margin, H - margin - bLen); ctx.lineTo(margin, H - margin); ctx.lineTo(margin + bLen, H - margin); ctx.stroke();
-  // Bottom-right
-  ctx.beginPath(); ctx.moveTo(W - margin - bLen, H - margin); ctx.lineTo(W - margin, H - margin); ctx.lineTo(W - margin, H - margin - bLen); ctx.stroke();
-
-  // REC indicator top-left
-  ctx.fillStyle = '#FF4B43';
-  ctx.beginPath(); ctx.arc(margin + 30, margin + 50, 8, 0, 2 * Math.PI); ctx.fill();
-  ctx.font = '700 24px "Space Mono", monospace';
-  ctx.fillStyle = '#FF4B43';
-  ctx.fillText('REC', margin + 50, margin + 58);
-
-  // Timestamp top-right
-  var now = colNow();
-  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
-  var ts = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
-  ctx.font = '700 22px "Space Mono", monospace';
-  ctx.fillStyle = 'rgba(130,253,71,0.4)';
-  ctx.textAlign = 'right';
-  ctx.fillText(ts, W - margin - 10, margin + 58);
-  ctx.textAlign = 'left';
-
-  // Center content
-  var cx = W / 2;
-
-  // Prize color accent line
-  ctx.fillStyle = (currentResultPrize.uiColor || currentResultPrize.color);
-  ctx.fillRect(cx - 120, 580, 240, 3);
-
-  // "GANASTE" label
-  ctx.font = '700 28px "Space Mono", monospace';
-  ctx.fillStyle = 'rgba(130,253,71,0.5)';
-  ctx.textAlign = 'center';
-  ctx.fillText('GANASTE', cx, 650);
-
-  // Prize name
-  ctx.font = '700 72px "Space Grotesk", sans-serif';
-  ctx.fillStyle = '#EFFFFE';
-  var prizeTitle = currentResultPrize.title.toUpperCase();
-  // Word wrap if needed
-  var words = prizeTitle.split(' ');
-  var lines = [];
-  var line = '';
-  for (var wi = 0; wi < words.length; wi++) {
-    var test = line ? line + ' ' + words[wi] : words[wi];
-    if (ctx.measureText(test).width > W - 160) {
-      lines.push(line);
-      line = words[wi];
-    } else {
-      line = test;
+  // Dot grid — top center (accent colored)
+  var dotR = 1.8, dotGap = 12;
+  ctx.fillStyle = accent.replace(')', ',0.12)').replace('rgb', 'rgba').replace('#', '');
+  // Use hex-to-rgba for dot grids
+  var dotAlpha = 0.12;
+  var drawDotCluster = function(ox, oy, w, h, alpha) {
+    ctx.save();
+    for (var dy = 0; dy < h; dy += dotGap) {
+      for (var dx = 0; dx < w; dx += dotGap) {
+        var dist = Math.sqrt(Math.pow(dx - w/2, 2) + Math.pow(dy - h/2, 2));
+        var maxDist = Math.sqrt(w*w + h*h) / 2;
+        var a = alpha * Math.max(0, 1 - dist / maxDist);
+        if (a < 0.01) continue;
+        ctx.globalAlpha = a;
+        ctx.fillStyle = accent;
+        ctx.beginPath(); ctx.arc(ox + dx, oy + dy, dotR, 0, 2 * Math.PI); ctx.fill();
+      }
     }
-  }
-  if (line) lines.push(line);
-  var lineH = 85;
-  var startY = 750 - (lines.length - 1) * lineH / 2;
-  for (var li = 0; li < lines.length; li++) {
-    ctx.fillText(lines[li], cx, startY + li * lineH);
-  }
+    ctx.restore();
+  };
+  drawDotCluster(cx - 320, -80, 640, 640, 0.18);
+  drawDotCluster(W - 400, H - 500, 500, 500, 0.10);
 
-  // Prize accent bar below name
-  var barY = startY + (lines.length - 1) * lineH + 40;
-  ctx.fillStyle = (currentResultPrize.uiColor || currentResultPrize.color);
-  ctx.fillRect(cx - 120, barY, 240, 3);
+  // ─── Terminal border box ───
+  var boxX = margin, boxY = 280, boxW = W - margin * 2, boxH = 1100;
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+  // Tab label "_PREMIO"
+  var tabW = 200, tabH = 36;
+  ctx.fillStyle = '#020102';
+  ctx.fillRect(boxX + 30, boxY - tabH/2, tabW, tabH);
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(boxX + 30, boxY - tabH/2, tabW, tabH);
+  ctx.font = '700 22px "Space Mono", monospace';
+  ctx.fillStyle = accent;
+  ctx.textAlign = 'left';
+  ctx.fillText('_PREMIO', boxX + 48, boxY + 8);
+
+  // Corner squares
+  var sq = 14;
+  ctx.fillStyle = accent;
+  ctx.fillRect(boxX + boxW - sq + 4, boxY - sq + 4, sq, sq);
+  ctx.fillRect(boxX - 4, boxY + boxH - 4, sq, sq);
+
+  // ─── Inside the box ───
+  ctx.textAlign = 'center';
+
+  // GANASTE pill
+  var pillY = boxY + 80;
+  var pillText = (prize.type === 'tuboleta') ? 'PREMIO MAYOR' : 'GANASTE';
+  ctx.font = '700 26px "Space Mono", monospace';
+  var pillW = ctx.measureText(pillText).width + 40;
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(cx - pillW/2, pillY - 18, pillW, 40);
+  ctx.fillStyle = (prize.type === 'tuboleta') ? accent : '#020102';
+  ctx.fillRect(cx - pillW/2 + 1, pillY - 17, pillW - 2, 38);
+  ctx.fillStyle = (prize.type === 'tuboleta') ? '#020102' : accent;
+  ctx.fillText(pillText, cx, pillY + 10);
+
+  // Prize title
+  ctx.fillStyle = '#EFFFFE';
+  var titleFs = Math.min(120, Math.round(prize.titleSize * 2.2));
+  ctx.font = '700 ' + titleFs + 'px "Space Grotesk", sans-serif';
+  var prizeTitle = prize.title.toUpperCase();
+  var titleLines = wrapText(ctx, prizeTitle, boxW - 80);
+  var tLineH = titleFs + 10;
+  var titleStartY = pillY + 90;
+  for (var ti = 0; ti < titleLines.length; ti++) {
+    ctx.fillText(titleLines[ti], cx, titleStartY + ti * tLineH);
+  }
 
   // Description
-  ctx.font = '400 28px "Space Grotesk", sans-serif';
-  ctx.fillStyle = 'rgba(239,255,254,0.6)';
-  var descLines = wrapText(ctx, currentResultPrize.desc, W - 200);
-  var descY = barY + 60;
+  var descStartY = titleStartY + (titleLines.length - 1) * tLineH + 60;
+  ctx.font = '700 34px "Space Grotesk", sans-serif';
+  ctx.fillStyle = '#EFFFFE';
+  var descLines = wrapText(ctx, prize.desc, boxW - 100);
   for (var di = 0; di < descLines.length; di++) {
-    ctx.fillText(descLines[di], cx, descY + di * 38);
+    ctx.fillText(descLines[di], cx, descStartY + di * 46);
   }
 
-  // Branding — bottom
-  ctx.font = '700 20px "Space Mono", monospace';
-  ctx.fillStyle = 'rgba(130,253,71,0.3)';
-  ctx.fillText('SALENTINO × RITVALES 2026', cx, H - margin - 100);
+  // Validity
+  if (prize.validity) {
+    var valY = descStartY + descLines.length * 46 + 20;
+    ctx.font = '400 24px "Space Mono", monospace';
+    ctx.fillStyle = '#C9D3CE';
+    ctx.fillText(prize.validity, cx, valY);
+  }
 
-  ctx.font = '400 18px "Space Mono", monospace';
-  ctx.fillStyle = 'rgba(239,255,254,0.25)';
-  ctx.fillText('@' + INSTAGRAM_HANDLE, cx, H - margin - 60);
+  // SVG-style divider line at bottom of box
+  var divY = boxY + boxH - 70;
+  ctx.strokeStyle = '#82FD47';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(boxX + 40, divY);
+  ctx.lineTo(cx - 60, divY);
+  ctx.lineTo(cx - 40, divY - 14);
+  ctx.lineTo(cx + 40, divY - 14);
+  ctx.lineTo(cx + 60, divY);
+  ctx.lineTo(boxX + boxW - 40, divY);
+  ctx.stroke();
+  // Diamond dot center
+  ctx.fillStyle = '#82FD47';
+  ctx.beginPath(); ctx.arc(cx, divY - 14, 5, 0, 2 * Math.PI); ctx.fill();
+
+  // Branding below box
+  ctx.font = '700 24px "Space Mono", monospace';
+  ctx.fillStyle = 'rgba(130,253,71,0.35)';
+  ctx.fillText('SALENTINO \u00d7 RITVALES 2026', cx, boxY + boxH + 80);
+
+  ctx.font = '400 22px "Space Mono", monospace';
+  ctx.fillStyle = '#A7B3AE';
+  ctx.fillText('@' + INSTAGRAM_HANDLE, cx, boxY + boxH + 120);
+
+  ctx.font = '700 20px "Space Mono", monospace';
+  ctx.fillStyle = '#8A9590';
+  ctx.fillText('LENTO DE ORIGEN \u2014 R\u00c1PIDO DE TOMAR', cx, H - margin - 30);
 
   ctx.textAlign = 'left';
-
   return c;
 }
 
