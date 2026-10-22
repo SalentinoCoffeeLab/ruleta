@@ -1691,6 +1691,7 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
 
   tl.to('#resultLogoRow', { opacity: 1, y: 0, duration: 0.35 })
     .to('#prizePill', { opacity: 1, y: 0, duration: 0.3 }, '-=0.1')
+    .to('#rName', { opacity: 1, y: 0, duration: 0.01 })
     .call(function() {
       decodeReveal(document.getElementById('rName'), prize.title.toUpperCase());
     })
