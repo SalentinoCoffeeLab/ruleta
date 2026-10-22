@@ -763,12 +763,12 @@ function fetchServerStatus() {
 // PRIZES (6 segments — server decides which one)
 // ═══════════════════════════════════════════════════════════
 var PRIZES = [
-  { id: 'cafe',        label: 'AEROPRESS',          title: 'Aeropress',  color: '#EC6E25', textColor: '#EFFFFE', desc: 'Muestra esta pantalla en el punto Salentino y reclama tu Aeropress. Válido solo hoy.', type: 'carrito' },
-  { id: 'fria',        label: 'BEBIDA FRÍA',        title: 'Bebida fría',      color: '#82FD47', textColor: '#020102', desc: 'Elige entre ' + OPCIONES_FRIAS + ' en el punto Salentino. Válido solo hoy.', type: 'carrito' },
-  { id: 'collar',      label: 'COLLAR\nRITVALES',   title: 'Collar Ritvales',  color: '#7D3BED', textColor: '#EFFFFE', desc: 'Collar oficial Ritvales 2026. Reclámalo en el punto Salentino. Válido solo hoy.', type: 'carrito' },
-  { id: 'desc20',      label: '20 % DCTO\nRITVALES', title: '20 % en boletería', color: '#224FD1', textColor: '#EFFFFE', desc: '20 % de descuento en boletería Ritvales. Completa tus datos y Ritvales te enviará el código.', type: 'tuboleta' },
-  { id: 'entrada',     label: 'ENTRADA\nRITVALES',  title: 'Entrada general',  color: '#FF4B43', textColor: '#EFFFFE', desc: '1 entrada general para Ritvales. Completa tus datos y Ritvales te la enviará.', type: 'tuboleta' },
-  { id: 'consolacion', label: CONSOLACION_PCT + ' %\nDCTO',  title: 'Descuento Salentino', color: '#AEE1F6', textColor: '#020102', desc: CONSOLACION_PCT + ' % de descuento en tu próxima compra en salentino.co. Válido por 30 días.', type: 'consolacion' },
+  { id: 'cafe',        label: 'AEROPRESS',            title: 'Aeropress',           color: '#EFFFFE', textColor: '#020102', cupo: 30, desc: 'Muestra esta pantalla en el punto Salentino. Válido solo hoy.', type: 'carrito' },
+  { id: 'fria',        label: 'BEBIDA FRÍA',          title: 'Bebida fría',         color: '#82FD47', textColor: '#020102', cupo: 15, desc: 'Elige entre ' + OPCIONES_FRIAS + ' en el punto Salentino. Válido solo hoy.', type: 'carrito' },
+  { id: 'collar',      label: 'COLLAR\nRITVALES',     title: 'Collar Ritvales',     color: '#7D3BED', textColor: '#EFFFFE', cupo: 10, desc: 'Collar oficial Ritvales 2026. Reclámalo en el punto Salentino. Válido solo hoy.', type: 'carrito' },
+  { id: 'desc20',      label: '20% DCTO\nRITVALES',   title: '20 % en boletería',   color: '#224FD1', textColor: '#EFFFFE', cupo: 8,  desc: '20 % de descuento en boletería Ritvales. Completa tus datos y te enviaremos el código.', type: 'tuboleta' },
+  { id: 'entrada',     label: 'ENTRADA\nRITVALES',    title: 'Entrada general',     color: '#FF4B43', textColor: '#EFFFFE', cupo: 3,  desc: '1 entrada general para Ritvales. Completa tus datos y te la enviaremos.', type: 'tuboleta' },
+  { id: 'consolacion', label: CONSOLACION_PCT + '% DCTO\nCAFÉ', title: 'Descuento Salentino', color: '#AEE1F6', textColor: '#020102', cupo: 9999, desc: CONSOLACION_PCT + ' % de descuento en salentino.co. Válido por 30 días.', type: 'consolacion' },
 ];
 
 var SEGMENTS = PRIZES.length;
