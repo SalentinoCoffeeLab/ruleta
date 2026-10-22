@@ -532,17 +532,17 @@
 // ═══════════════════════════════════════════════════════════
 // CONFIG CONSTANTS
 // ═══════════════════════════════════════════════════════════
-var SHEET_URL = 'https://script.google.com/macros/s/AKfycbx7fLPf444KH3lODKpv9mE0iBX1Zh0NXyq29_0J31KpJTizhC4k4H2fv2V1hxkQpOHpVQ/exec';
-var serverConnected = false;
-
-// Config constants
+var SHEET_URL          = 'https://script.google.com/macros/s/AKfycbx7fLPf444KH3lODKpv9mE0iBX1Zh0NXyq29_0J31KpJTizhC4k4H2fv2V1hxkQpOHpVQ/exec';
 var FECHA_ACTIVACION   = 'sábado 24 y domingo 25 de octubre de 2026';
 var OPCIONES_FRIAS     = 'cold brew, cold brew tonic o iced latte';
 var CONSOLACION_PCT    = '15';
 var URL_POLITICA_DATOS = 'https://salentino.co/policies/privacy-policy';
 var INSTAGRAM_HANDLE   = 'salentino.co';
-var INSTAGRAM_URL      = 'https://www.instagram.com/salentino.co';
+var INSTAGRAM_URL      = 'https://www.instagram.com/' + INSTAGRAM_HANDLE;
 var WEBSITE_URL        = 'https://salentino.co';
+
+// ─── RUNTIME STATE ───
+var serverConnected = false;
 
 // ═══════════════════════════════════════════════════════════
 // SERVER COMMUNICATION
@@ -701,7 +701,7 @@ function showAlreadyPlayed(data) {
 // ═══════════════════════════════════════════════════════════
 var wheelCanvas = document.getElementById('wheelCanvas');
 var ctx = wheelCanvas.getContext('2d');
-var DPR = Math.min(window.devicePixelRatio || 1, 3);
+var DPR = Math.min(window.devicePixelRatio || 1, 2);
 var SIZE = 1000;
 wheelCanvas.width = SIZE * DPR;
 wheelCanvas.height = SIZE * DPR;
