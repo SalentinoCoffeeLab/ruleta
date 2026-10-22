@@ -312,6 +312,14 @@
     flex-direction: column; align-items: center; justify-content: flex-start;
     padding: 24px 16px 16px; text-align: center; background: var(--black); z-index: 30;
     overflow-y: auto; -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+  /* Particle glow behind counter prize cards */
+  .result-screen .particle-glow-bg {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -55%);
+    width: 320px; height: 320px; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, var(--accent-color, rgba(130,253,71,0.08)) 0%, transparent 70%);
+    opacity: 0.4;
   }
 
   /* ─── PRIZE CARD (terminal box) ─── */
@@ -338,6 +346,27 @@
   .prize-card.glow {
     border-color: var(--accent-color, rgba(130,253,71,0.35));
   }
+  /* Pass tab label on prize card */
+  .prize-card[data-tab]::after {
+    content: attr(data-tab); position: absolute; top: -1px; left: 12px;
+    background: var(--accent-color, var(--green)); color: var(--black);
+    font-family: var(--mono); font-size: 8px; font-weight: 700;
+    letter-spacing: 2px; padding: 2px 8px; height: auto;
+  }
+  /* Counter instruction (show-this-screen prompt) */
+  .prize-instruction {
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--green); margin: 12px 0 4px; opacity: 0;
+  }
+  /* Consolacion discount code display */
+  .consolacion-code {
+    font-family: var(--mono); font-size: 24px; font-weight: 700;
+    letter-spacing: 4px; color: var(--off-white);
+    padding: 10px 16px; margin: 8px auto;
+    border: 1px solid rgba(130,253,71,0.2); display: inline-block;
+    opacity: 0;
+  }
 
   .result-screen .r-label {
     font-family: var(--mono); font-size: 10px; letter-spacing: 6px;
@@ -363,6 +392,7 @@
     color: var(--off-white); letter-spacing: 2px; text-align: center;
     margin: 0 0 6px; font-variant-numeric: tabular-nums;
   }
+  .prize-clock.hidden { display: none; }
   .prize-meta {
     font-family: var(--mono); font-size: 9px; color: rgba(239,255,254,0.4);
     letter-spacing: 0.3px; text-align: center; margin-bottom: 12px; line-height: 1.5;
@@ -606,11 +636,14 @@
 
 <!-- SCREEN 3: RESULT -->
 <div id="resultScreen" class="screen result-screen">
+  <div class="particle-glow-bg" id="resultGlow" style="display:none;"></div>
   <div class="prize-card" id="prizeCard">
     <div class="r-label" id="rLabel"></div>
     <div class="r-name" id="rName"></div>
     <div class="r-divider" id="rDivider"></div>
     <div class="r-desc" id="rDesc"></div>
+    <div class="prize-instruction" id="prizeInstruction" style="display:none;"></div>
+    <div class="consolacion-code" id="consolacionCode" style="display:none;"></div>
     <div id="rDeliverWrap" style="display:none;"></div>
     <div id="rTuboletaWrap" style="display:none;">
       <div class="tuboleta-form" id="tuboletaForm">
@@ -1245,12 +1278,15 @@ function updatePrizeCard(prize, playerName, code, ganadoEn, canjeadoEn) {
   var metaEl = document.getElementById('prizeMeta');
   var statusEl = document.getElementById('prizeStatus');
   var redeemEl = document.getElementById('prizeRedeemLink');
+  var isCounter = (prize.type === 'carrito' || prize.type === 'consolacion');
 
-  // Live clock
+  // Live clock — only for tuboleta (premio mayor)
   if (prizeClockInterval) { clearInterval(prizeClockInterval); prizeClockInterval = null; }
-  function tickClock() { clockEl.textContent = colClockStr(); }
-  tickClock();
-  prizeClockInterval = setInterval(tickClock, 1000);
+  if (!isCounter) {
+    function tickClock() { clockEl.textContent = colClockStr(); }
+    tickClock();
+    prizeClockInterval = setInterval(tickClock, 1000);
+  }
 
   // Meta line: name · code · Ganado sáb 24 HH:MM
   var ganadoParts = colDateParts(ganadoEn || TODAY);
@@ -1343,6 +1379,7 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   currentResultPrize = prize;
   currentResultPlayer = playerName;
   currentGanadoEn = ganadoEn || TODAY;
+  var isCounter = (prize.type === 'carrito' || prize.type === 'consolacion');
   var isWinner = (prize.type === 'tuboleta');
   hideAllScreens();
   var screen = document.getElementById('resultScreen');
@@ -1354,9 +1391,36 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
 
   var deliverWrap = document.getElementById('rDeliverWrap');
   var tuboletaWrap = document.getElementById('rTuboletaWrap');
+  var instructionEl = document.getElementById('prizeInstruction');
+  var consolacionCodeEl = document.getElementById('consolacionCode');
+  var glowEl = document.getElementById('resultGlow');
+  var clockEl = document.getElementById('prizeClock');
+  var prizeCard = document.getElementById('prizeCard');
 
+  // Reset elements
   deliverWrap.style.display = 'none';
-  if (prize.type === 'tuboleta') {
+  tuboletaWrap.style.display = 'none';
+  instructionEl.style.display = 'none';
+  consolacionCodeEl.style.display = 'none';
+  glowEl.style.display = 'none';
+  clockEl.classList.remove('hidden');
+  prizeCard.removeAttribute('data-tab');
+
+  if (isCounter) {
+    // Counter prizes: particle glow, pass tab, no clock
+    glowEl.style.display = '';
+    clockEl.classList.add('hidden');
+    prizeCard.setAttribute('data-tab', prize.type === 'consolacion' ? 'DESCUENTO' : 'PASE');
+
+    if (prize.type === 'carrito') {
+      instructionEl.textContent = 'MUESTRA ESTA PANTALLA';
+      instructionEl.style.display = '';
+    } else if (prize.type === 'consolacion') {
+      // Show discount code (the user's code serves as the coupon)
+      consolacionCodeEl.textContent = currentResultCode || '---';
+      consolacionCodeEl.style.display = '';
+    }
+  } else if (isWinner) {
     tuboletaWrap.style.display = 'block';
     document.getElementById('tuboName').value = currentResultPlayer || '';
     document.getElementById('tuboCedula').value = '';
@@ -1364,21 +1428,19 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
     document.getElementById('btnTuboleta').disabled = false;
     document.getElementById('btnTuboleta').textContent = 'ENVIAR DATOS A RITVALES';
     document.getElementById('tuboConfirm').classList.remove('visible');
-  } else {
-    tuboletaWrap.style.display = 'none';
   }
 
-  // Set accent color on card
-  document.getElementById('prizeCard').style.setProperty('--accent-color', prize.color);
+  // Set accent color on card and glow
+  prizeCard.style.setProperty('--accent-color', prize.color);
+  screen.style.setProperty('--accent-color', prize.color);
 
   updatePrizeCard(prize, playerName, currentResultCode, currentGanadoEn, canjeadoEn);
 
   // GSAP Timeline
-  var card = document.getElementById('prizeCard');
   if (typeof gsap === 'undefined') {
-    card.style.opacity = '1'; card.style.transform = 'none';
+    prizeCard.style.opacity = '1'; prizeCard.style.transform = 'none';
     document.getElementById('rName').textContent = prize.title;
-    ['rLabel','rName','rDesc','rDivider','btnPlayAgain','btnShareStory'].forEach(function(id) {
+    ['rLabel','rName','rDesc','rDivider','btnPlayAgain','btnShareStory','prizeInstruction','consolacionCode'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
     });
@@ -1387,10 +1449,13 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   }
   var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-  gsap.set(card, { opacity: 0, y: 30, scale: 0.95 });
+  gsap.set(prizeCard, { opacity: 0, y: 30, scale: 0.95 });
   gsap.set(['#rLabel', '#rDesc', '#rDivider', '#btnShareStory', '#btnPlayAgain'], { opacity: 0, y: 15 });
+  if (isCounter) {
+    gsap.set(['#prizeInstruction', '#consolacionCode'], { opacity: 0, y: 10 });
+  }
 
-  tl.to(card, { opacity: 1, y: 0, scale: 1, duration: 0.6 })
+  tl.to(prizeCard, { opacity: 1, y: 0, scale: 1, duration: 0.6 })
     .to('#rLabel', { opacity: 0.6, y: 0, duration: 0.3 }, '-=0.1')
     .call(function() {
       decodeReveal(document.getElementById('rName'), prize.title.toUpperCase());
@@ -1398,7 +1463,12 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
     .to('#rDivider', { opacity: 1, y: 0, duration: 0.3 }, '+=0.3')
     .to('#rDesc', { opacity: 1, y: 0, duration: 0.35 }, '-=0.1');
 
-  if (prize.type === 'tuboleta') {
+  // Counter-specific reveals
+  if (prize.type === 'carrito') {
+    tl.to('#prizeInstruction', { opacity: 1, y: 0, duration: 0.3 }, '-=0.05');
+  } else if (prize.type === 'consolacion') {
+    tl.to('#consolacionCode', { opacity: 1, y: 0, duration: 0.4 }, '-=0.05');
+  } else if (isWinner) {
     gsap.set('#rTuboletaWrap', { opacity: 0, y: 15 });
     tl.to('#rTuboletaWrap', { opacity: 1, y: 0, duration: 0.4 }, '-=0.05');
   }
