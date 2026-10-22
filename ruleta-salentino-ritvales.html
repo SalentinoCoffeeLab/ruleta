@@ -359,34 +359,50 @@
 
   /* ─── WHEEL SCREEN ─── */
   .wheel-screen {
-    flex-direction: column; align-items: center; justify-content: space-between;
-    padding: calc(8px + var(--sat)) 16px calc(8px + var(--sab)); background: var(--black); z-index: 20;
+    flex-direction: column; align-items: center;
+    padding: calc(40px + var(--sat)) 20px calc(22px + var(--sab)); background: var(--black); z-index: 20;
+    position: relative;
   }
-  .header { text-align: center; flex-shrink: 0; width: 100%; padding-top: 4px; }
-  .player-greeting {
-    font-family: var(--grotesk); font-size: clamp(16px, 4.5vw, 22px); font-weight: 700;
-    color: var(--off-white); letter-spacing: 0.5px;
+  /* Green dot grid behind wheel */
+  .wheel-screen::before {
+    content: ''; position: absolute; left: -40px; top: 250px;
+    width: 470px; height: 470px; pointer-events: none;
+    background-image: radial-gradient(circle, var(--green) 0.9px, transparent 1.5px);
+    background-size: 5px 5px;
+    -webkit-mask-image: radial-gradient(circle, #000 0%, rgba(0,0,0,0.35) 35%, transparent 66%);
+    mask-image: radial-gradient(circle, #000 0%, rgba(0,0,0,0.35) 35%, transparent 66%);
   }
-  .player-greeting .greeting-name { color: var(--green); }
+  .wheel-logo-row {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    position: relative; flex-shrink: 0;
+  }
+  .wheel-logo-row img { height: 22px; width: auto; }
+  .wheel-logo-row .logo-x { font-size: 12px; font-weight: 700; color: var(--green); }
+  .wheel-divider { position: relative; display: block; margin-top: 14px; flex-shrink: 0; }
+
+  .header { text-align: center; flex-shrink: 0; width: 100%; margin-top: 22px; position: relative; }
+  .player-greeting-name {
+    font-family: var(--grotesk); font-size: 38px; line-height: 42px; font-weight: 700;
+    letter-spacing: -1px; color: var(--off-white); margin: 0;
+  }
+  .player-greeting-sub {
+    font-family: var(--mono); font-size: 16px; line-height: 24px;
+    color: var(--off-white); margin: 4px 0 0;
+  }
+  .player-greeting-sub .hl { color: var(--green); font-weight: 700; }
 
   .wheel-section { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; position: relative; }
   .wheel-wrap {
     position: relative;
-    width: min(90vw, calc(100dvh - 160px)); height: min(90vw, calc(100dvh - 160px));
-    max-width: 500px; max-height: 500px;
-  }
-  /* Particle glow ring around wheel (no blur) */
-  .wheel-wrap::before {
-    content: ''; position: absolute; inset: -20px;
-    border-radius: 50%; pointer-events: none;
-    background: radial-gradient(circle, rgba(130,253,71,0.06) 60%, transparent 70%);
+    width: min(87vw, calc(100dvh - 340px)); height: min(87vw, calc(100dvh - 340px));
+    max-width: 340px; max-height: 340px;
   }
 
   .pointer {
     position: absolute; top: -18px; left: 50%; transform: translateX(-50%); z-index: 20;
     width: 0; height: 0;
-    border-left: 18px solid transparent; border-right: 18px solid transparent;
-    border-top: 34px solid var(--off-white);
+    border-left: 15px solid transparent; border-right: 15px solid transparent;
+    border-top: 30px solid var(--off-white);
     transition: border-top-color 0.08s;
   }
   .pointer.tick { border-top-color: var(--green); }
@@ -399,27 +415,31 @@
 
   .center-hub {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 15;
-    width: 110px; height: 110px; border-radius: 50%;
-    background: var(--green); border: 3px solid var(--black);
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--green); border: 4px solid var(--black);
+    box-shadow: 0 0 0 2px var(--green), 0 0 0 7px rgba(130,253,71,0.18);
     display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 2px; cursor: pointer;
+    cursor: pointer; padding: 0;
   }
-  .center-hub .hub-icon { font-size: 26px; line-height: 1; }
-  .center-hub .hub-label { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 4px; color: var(--black); text-transform: uppercase; }
-  .center-hub.spinning .hub-icon { animation: pulseSpin 1s ease infinite; }
+  .center-hub .hub-icon { display: none; }
+  .center-hub .hub-label {
+    font-family: var(--grotesk); font-size: 15px; font-weight: 700;
+    letter-spacing: 2px; color: var(--black); text-transform: uppercase;
+  }
   .center-hub.spinning .hub-label { animation: pulseSpin 1s ease infinite; }
   @keyframes pulseSpin { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 
-  .swipe-hint {
-    font-family: var(--mono); font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
-    color: var(--green); opacity: 0.3; margin-top: 8px;
-    animation: fadeHint 2s ease infinite;
-  }
-  @keyframes fadeHint { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.4; } }
-  .swipe-hint.hidden { display: none; }
+  .swipe-hint { display: none; }
 
-  .footer { flex-shrink: 0; text-align: center; width: 100%; }
-  .footer .live-clock { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; color: var(--green); opacity: 0.3; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .ticket-label {
+    position: relative; flex-shrink: 0;
+    font-family: var(--mono); font-size: 12px; color: #A7B3AE;
+    padding: 7px 12px; border: 1px solid #2E3D27; margin-bottom: 18px;
+  }
+  .ticket-label .ticket-code { color: var(--off-white); font-weight: 700; letter-spacing: 1px; }
+
+  .footer { flex-shrink: 0; text-align: center; width: 100%; position: relative; }
+  .footer .live-clock { display: none; }
 
   /* ─── RESULT SCREEN ─── */
   .result-screen {
@@ -480,8 +500,9 @@
   .result-screen .r-name {
     font-family: var(--grotesk); font-weight: 700;
     color: var(--off-white); line-height: 1.05; margin-bottom: 10px;
-    max-width: 320px; opacity: 0; letter-spacing: -2px;
-    position: relative; z-index: 1;
+    max-width: 320px; opacity: 0; letter-spacing: -1px;
+    position: relative; z-index: 1; text-align: center;
+    word-spacing: 0.05em;
   }
   .result-screen .r-desc {
     font-family: var(--grotesk); font-size: 18px; font-weight: 700;
@@ -943,8 +964,11 @@
 
 <!-- SCREEN 2: WHEEL -->
 <div id="wheelScreen" class="screen wheel-screen">
+  <div class="wheel-logo-row" id="wheelLogoRow"></div>
+  <svg class="wheel-divider" width="346" height="20" viewBox="0 0 346 20" aria-hidden="true"><path d="M0 10 H118 L126 3 H221 L229 10 H346" fill="none" stroke="#82FD47" stroke-width="1.5"/><rect x="114" y="6" width="8" height="8" fill="#020102" stroke="#82FD47" stroke-width="1.5"/><rect x="225" y="6" width="8" height="8" fill="#020102" stroke="#82FD47" stroke-width="1.5"/><circle cx="173" cy="3" r="2.5" fill="#82FD47"/></svg>
   <div class="header">
-    <div class="player-greeting" id="playerGreeting"></div>
+    <p class="player-greeting-name" id="playerGreetingName"></p>
+    <p class="player-greeting-sub">toca <span class="hl">GIRAR</span>.</p>
   </div>
   <div class="wheel-section">
     <div class="wheel-wrap idle" id="wheelWrap">
@@ -952,10 +976,10 @@
       <canvas id="wheelCanvas"></canvas>
       <div class="center-hub" id="centerHub"><span class="hub-label">GIRAR</span></div>
     </div>
-    <div class="swipe-hint" id="swipeHint">DESLIZA O TOCA GIRAR</div>
   </div>
+  <div class="ticket-label" id="ticketLabel">_TICKET <span class="ticket-code" id="ticketCode"></span></div>
   <div class="footer" id="footer">
-    <div class="live-clock" id="liveClock"></div>
+    <div class="footer-phrase">LENTO DE ORIGEN - R&Aacute;PIDO DE TOMAR</div>
   </div>
 </div>
 
@@ -1548,11 +1572,25 @@ function showWheelAndSpin(name, prize, ganadoEn) {
   document.getElementById('wheelScreen').classList.add('active');
   var firstName = name.split(' ')[0];
   firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
-  document.getElementById('playerGreeting').innerHTML = '&iexcl;Hola, <span class="greeting-name">' + firstName + '</span>!';
+  document.getElementById('playerGreetingName').textContent = firstName + ',';
+
+  // Copy logos to wheel screen
+  var salLogo = document.querySelector('.entry-screen .logo-salentino');
+  var rtvLogo = document.querySelector('.entry-screen .logo-ritvales');
+  var logoRow = document.getElementById('wheelLogoRow');
+  if (salLogo && logoRow.children.length === 0) {
+    var s = document.createElement('img'); s.src = salLogo.src; s.alt = 'Salentino';
+    var x = document.createElement('span'); x.className = 'logo-x'; x.innerHTML = '&times;';
+    var r = document.createElement('img'); r.src = rtvLogo.src; r.alt = 'Ritvales';
+    logoRow.appendChild(s); logoRow.appendChild(x); logoRow.appendChild(r);
+  }
+
+  // Show ticket code
+  var codeEl = document.getElementById('inputCode');
+  document.getElementById('ticketCode').textContent = codeEl ? codeEl.value.trim().toUpperCase() : '';
+
   var wrap = document.getElementById('wheelWrap');
   wrap.classList.add('idle');
-  document.getElementById('swipeHint').classList.remove('hidden');
-  startLiveClock();
   pendingSpin = { prize: prize, name: name, ganadoEn: ganadoEn };
 }
 
@@ -1635,7 +1673,7 @@ function triggerSpin() {
   var wrap = document.getElementById('wheelWrap');
   wrap.classList.remove('idle');
   // Hide swipe hint
-  document.getElementById('swipeHint').classList.add('hidden');
+  var swH = document.getElementById('swipeHint'); if (swH) swH.classList.add('hidden');
   trackEvent('spin_trigger', data.prize.id);
   spin(data.prize, data.name, data.ganadoEn);
 }
