@@ -7,9 +7,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#020102">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <title>SALENTINO x RITVALES 2K26</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Space+Mono:wght@400;700&display=swap');
 
   :root {
     --black: #020102;
@@ -886,6 +888,23 @@
       transition-duration: 0.01ms !important;
     }
   }
+
+  /* ─── LANDSCAPE LOCK ─── */
+  .landscape-prompt {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: var(--black); color: var(--off-white);
+    flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 40px;
+  }
+  .landscape-prompt svg { margin-bottom: 20px; opacity: 0.6; }
+  .landscape-prompt p {
+    font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    color: #C9D3CE; max-width: 260px;
+  }
+  @media (orientation: landscape) and (max-height: 500px) {
+    .landscape-prompt { display: flex; }
+    .screen { visibility: hidden; }
+  }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 </head>
@@ -894,6 +913,12 @@
 <canvas id="bgCanvas"></canvas>
 <div class="vignette"></div>
 <div class="scanlines"></div>
+
+<!-- Landscape lock -->
+<div class="landscape-prompt">
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#82FD47" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+  <p>Gira tu celular a vertical para continuar.</p>
+</div>
 
 <!-- SCREEN 1: CODE + REGISTRATION -->
 <div id="entryScreen" class="screen entry-screen active">
@@ -2527,6 +2552,114 @@ trackEvent('page_load');
     webLinks[i].href = WEBSITE_URL;
     webLinks[i].textContent = WEBSITE_URL.replace('https://', '');
   }
+})();
+
+// ═══════════════════════════════════════════════════════════
+// ANDROID KEYBOARD — scroll input into view on focus
+// ═══════════════════════════════════════════════════════════
+(function() {
+  var inputs = document.querySelectorAll('input');
+  for (var i = 0; i < inputs.length; i++) {
+    inputs[i].addEventListener('focus', function() {
+      var el = this;
+      setTimeout(function() {
+        // Find scrollable parent screen
+        var parent = el.closest('.screen');
+        if (parent && parent.style) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300); // wait for keyboard to open
+    });
+  }
+
+  // Also handle visualViewport resize (Android Chrome)
+  if (window.visualViewport) {
+    var lastH = window.visualViewport.height;
+    window.visualViewport.addEventListener('resize', function() {
+      var h = window.visualViewport.height;
+      if (h < lastH) {
+        // Keyboard opened — scroll active element into view
+        var active = document.activeElement;
+        if (active && active.tagName === 'INPUT') {
+          setTimeout(function() {
+            active.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        }
+      }
+      lastH = h;
+    });
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════
+// HISTORY STATE — back button navigates between screens
+// ═══════════════════════════════════════════════════════════
+(function() {
+  var currentScreen = 'entry';
+
+  // Push state when navigating to a new screen
+  var origHideAll = hideAllScreens;
+  hideAllScreens = function() {
+    origHideAll();
+  };
+
+  function pushScreen(name) {
+    if (currentScreen === name) return;
+    currentScreen = name;
+    try {
+      history.pushState({ screen: name }, '');
+    } catch(e) {}
+  }
+
+  // Patch screen transitions
+  var origShowWheel = showWheelAndSpin;
+  showWheelAndSpin = function(name, prize, ganadoEn) {
+    pushScreen('wheel');
+    origShowWheel(name, prize, ganadoEn);
+  };
+
+  var origShowResult = showResult;
+  showResult = function(prize, playerName, ganadoEn, canjeadoEn) {
+    pushScreen('result');
+    origShowResult(prize, playerName, ganadoEn, canjeadoEn);
+  };
+
+  var origShowPlayed = showAlreadyPlayed;
+  showAlreadyPlayed = function(data) {
+    pushScreen('played');
+    origShowPlayed(data);
+  };
+
+  var origPlayAgain = playAgain;
+  playAgain = function() {
+    pushScreen('entry');
+    origPlayAgain();
+  };
+
+  // Handle back button
+  window.addEventListener('popstate', function(e) {
+    var target = (e.state && e.state.screen) ? e.state.screen : 'entry';
+    currentScreen = target;
+
+    // Close overlays first
+    var overlays = document.querySelectorAll('.admin-panel.active, #redeemOverlay.active, #termsOverlay.active, #pinOverlay.active');
+    if (overlays.length > 0) {
+      for (var i = 0; i < overlays.length; i++) overlays[i].classList.remove('active');
+      return;
+    }
+
+    if (target === 'entry') {
+      hideAllScreens();
+      document.getElementById('entryScreen').classList.add('active');
+    }
+    // For wheel/result/played, we can't reconstruct the full state,
+    // so if they go back past entry, just keep them on entry
+  });
+
+  // Set initial state
+  try {
+    history.replaceState({ screen: 'entry' }, '');
+  } catch(e) {}
 })();
 </script>
 </body>
