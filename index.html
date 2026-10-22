@@ -462,6 +462,15 @@
   canvas#bgCanvas { position: fixed; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
   canvas#confettiCanvas { position: fixed; inset: 0; z-index: 350; pointer-events: none; }
 
+  /* Screen flash after spin */
+  .screen-flash {
+    position: fixed; inset: 0; z-index: 300; pointer-events: none;
+    background: var(--off-white); opacity: 0;
+  }
+
+  /* Decode effect on prize name */
+  .decode-char { display: inline-block; opacity: 0; transform: translateY(8px); }
+
   /* ─── ADMIN PANEL ─── */
   .admin-panel { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(2,1,2,0.97); padding: 24px 16px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .admin-panel.active { display: block; }
@@ -663,6 +672,7 @@
 </div>
 
 <canvas id="confettiCanvas"></canvas>
+<div class="screen-flash" id="screenFlash"></div>
 
 <!-- TERMS & CONDITIONS -->
 <div id="termsOverlay" class="terms-overlay">
@@ -1110,8 +1120,29 @@ function showWheelAndSpin(name, prize, ganadoEn) {
   pendingSpin = { prize: prize, name: name, ganadoEn: ganadoEn };
 }
 
-function spin(prize, playerName) {
+// Wake Lock helper
+var wakeLockSentinel = null;
+function acquireWakeLock() {
+  if ('wakeLock' in navigator) {
+    navigator.wakeLock.request('screen').then(function(s) { wakeLockSentinel = s; }).catch(function() {});
+  }
+}
+function releaseWakeLock() {
+  if (wakeLockSentinel) { wakeLockSentinel.release().catch(function() {}); wakeLockSentinel = null; }
+}
+
+function screenFlash(cb) {
+  var el = document.getElementById('screenFlash');
+  if (typeof gsap !== 'undefined') {
+    gsap.fromTo(el, { opacity: 0.8 }, { opacity: 0, duration: 0.5, ease: 'power2.out', onComplete: cb });
+  } else {
+    cb();
+  }
+}
+
+function spin(prize, playerName, ganadoEn) {
   isSpinning = true;
+  acquireWakeLock();
   var hub = document.getElementById('centerHub');
   hub.classList.add('spinning');
   var prizeIndex = PRIZES.indexOf(prize);
@@ -1141,7 +1172,18 @@ function spin(prize, playerName) {
       setTimeout(function() { pointer.classList.remove('tick'); }, 50);
     }
     if (t < 1) { requestAnimationFrame(animate); }
-    else { isSpinning = false; hub.classList.remove('spinning'); showResult(prize, playerName, ganadoEn); }
+    else {
+      isSpinning = false;
+      hub.classList.remove('spinning');
+      if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+      // Pause 800ms → flash → reveal
+      setTimeout(function() {
+        screenFlash(function() {
+          releaseWakeLock();
+          showResult(prize, playerName, ganadoEn);
+        });
+      }, 800);
+    }
   }
   requestAnimationFrame(animate);
 }
@@ -1158,7 +1200,7 @@ function triggerSpin() {
   wrap.classList.remove('idle');
   // Hide swipe hint
   document.getElementById('swipeHint').classList.add('hidden');
-  spin(data.prize, data.name);
+  spin(data.prize, data.name, data.ganadoEn);
 }
 
 // Hub click
@@ -1268,6 +1310,35 @@ function redeemCarrito() {
   });
 }
 
+// Decode effect: reveal text char by char
+function decodeReveal(el, text, onDone) {
+  el.innerHTML = '';
+  var chars = text.split('');
+  var glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%';
+  var spans = chars.map(function(ch) {
+    var span = document.createElement('span');
+    span.className = 'decode-char';
+    span.textContent = ch === ' ' ? '\u00A0' : glyphs[Math.floor(Math.random() * glyphs.length)];
+    span.dataset.target = ch;
+    el.appendChild(span);
+    return span;
+  });
+
+  if (typeof gsap === 'undefined') {
+    spans.forEach(function(s) { s.textContent = s.dataset.target; s.style.opacity = '1'; s.style.transform = 'none'; });
+    if (onDone) onDone();
+    return;
+  }
+
+  var tl = gsap.timeline({ onComplete: onDone || function() {} });
+  spans.forEach(function(span, i) {
+    var delay = i * 0.04;
+    // Quick scramble then reveal
+    tl.to(span, { opacity: 1, y: 0, duration: 0.15, ease: 'power2.out' }, delay);
+    tl.call(function() { span.textContent = span.dataset.target; }, null, delay + 0.08);
+  });
+}
+
 function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   currentResultPrize = prize;
   currentResultPlayer = playerName;
@@ -1279,7 +1350,6 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   if (isWinner) screen.classList.add('winner');
 
   document.getElementById('rLabel').textContent = 'GANASTE';
-  document.getElementById('rName').textContent = prize.title;
   document.getElementById('rDesc').textContent = prize.desc;
 
   var deliverWrap = document.getElementById('rDeliverWrap');
@@ -1307,34 +1377,37 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   var card = document.getElementById('prizeCard');
   if (typeof gsap === 'undefined') {
     card.style.opacity = '1'; card.style.transform = 'none';
+    document.getElementById('rName').textContent = prize.title;
     ['rLabel','rName','rDesc','rDivider','btnPlayAgain','btnShareStory'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
     });
-    if (isWinner) launchConfetti();
+    launchConfetti();
     return;
   }
   var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
   gsap.set(card, { opacity: 0, y: 30, scale: 0.95 });
-  gsap.set(['#rLabel', '#rName', '#rDesc', '#rDivider', '#btnShareStory', '#btnPlayAgain'], { opacity: 0, y: 15 });
+  gsap.set(['#rLabel', '#rDesc', '#rDivider', '#btnShareStory', '#btnPlayAgain'], { opacity: 0, y: 15 });
 
   tl.to(card, { opacity: 1, y: 0, scale: 1, duration: 0.6 })
     .to('#rLabel', { opacity: 0.6, y: 0, duration: 0.3 }, '-=0.1')
-    .to('#rName', { opacity: 1, y: 0, duration: 0.4 }, '-=0.1')
-    .to('#rDivider', { opacity: 1, y: 0, duration: 0.3 }, '-=0.15')
+    .call(function() {
+      decodeReveal(document.getElementById('rName'), prize.title.toUpperCase());
+    })
+    .to('#rDivider', { opacity: 1, y: 0, duration: 0.3 }, '+=0.3')
     .to('#rDesc', { opacity: 1, y: 0, duration: 0.35 }, '-=0.1');
 
   if (prize.type === 'tuboleta') {
-    tl.to('#rTuboletaWrap', { opacity: 1, y: 0, duration: 0.4 }, '-=0.05');
     gsap.set('#rTuboletaWrap', { opacity: 0, y: 15 });
+    tl.to('#rTuboletaWrap', { opacity: 1, y: 0, duration: 0.4 }, '-=0.05');
   }
 
   tl.to('#btnShareStory', { opacity: 1, y: 0, duration: 0.35 }, '+=0.2');
   tl.to('#btnPlayAgain', { opacity: 1, y: 0, duration: 0.4 }, '-=0.1');
-  tl.call(function() { card.classList.add('glow'); }, null, '-=0.6');
 
-  if (isWinner) launchConfetti();
+  // Confetti for all prizes
+  launchConfetti();
 }
 
 function playAgain() {
