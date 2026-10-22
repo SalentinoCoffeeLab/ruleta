@@ -373,11 +373,8 @@
     padding: 20px 16px 14px;
     text-align: center; opacity: 0;
   }
-  .pass-box[data-tab]::after {
-    content: attr(data-tab); position: absolute; top: -1px; left: 12px;
+  .pass-box.terminal-box::before {
     background: var(--accent-color, var(--green)); color: var(--black);
-    font-family: var(--mono); font-size: 8px; font-weight: 700;
-    letter-spacing: 2px; padding: 2px 8px;
   }
   .pass-name {
     font-family: var(--mono); font-size: 14px; font-weight: 700;
@@ -418,11 +415,10 @@
     padding: 20px 16px 14px;
     text-align: center; opacity: 0;
   }
-  .mayor-box[data-tab]::after {
-    content: attr(data-tab); position: absolute; top: -1px; left: 12px;
+  .mayor-box.terminal-box::before {
     background: var(--accent-color, var(--green)); color: var(--black);
-    font-family: var(--mono); font-size: 7px; font-weight: 700;
-    letter-spacing: 1.5px; padding: 2px 6px;
+    font-size: 7px;
+    letter-spacing: 1.5px;
   }
   .mayor-clock {
     font-family: var(--mono); font-size: 28px; font-weight: 700;
@@ -786,7 +782,7 @@
     <div class="mayor-clock" id="prizeClock"></div>
   </div>
 
-  <button class="btn-share-story" id="btnShareStory">COMP\u00c1RTELO EN TU HISTORIA</button>
+  <button class="btn-share-story" id="btnShareStory">COMPÁRTELO EN TU HISTORIA</button>
   <div class="social-links">
     <a href="" class="social-link social-ig" target="_blank">
       Instagram <span class="social-at">@</span><span class="social-handle"></span>
@@ -794,8 +790,8 @@
     <span class="social-dot">&middot;</span>
     <a href="" class="social-link social-web" target="_blank"></a>
   </div>
-  <button class="btn-play-again" id="btnPlayAgain" onclick="playAgain()">\u00bfOTRO C\u00d3DIGO? GIRA DE NUEVO</button>
-  <div class="footer-phrase">LENTO DE ORIGEN - R\u00c1PIDO DE TOMAR</div>
+  <button class="btn-play-again" id="btnPlayAgain" onclick="playAgain()">&iquest;OTRO C&Oacute;DIGO? GIRA DE NUEVO</button>
+  <div class="footer-phrase">LENTO DE ORIGEN - R&Aacute;PIDO DE TOMAR</div>
 </div>
 
 <!-- SCREEN 4: ALREADY PLAYED -->
@@ -1425,10 +1421,11 @@ function colClockStr() {
   return new Intl.DateTimeFormat('es-CO', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false, timeZone: 'America/Bogota' }).format(new Date());
 }
 function colDateParts(dateStr) {
-  // dateStr = "2026-10-24" → { dayName: 'sáb 24', time: 'HH:MM' }
-  var parts = dateStr.split('-');
+  // dateStr = "2026-10-24" or "2026-10-24 15:30:00"
+  var dateOnly = (dateStr || '').slice(0, 10);
+  var parts = dateOnly.split('-');
   var d = new Date(Date.UTC(+parts[0], +parts[1]-1, +parts[2], 12, 0, 0));
-  var dayNames = ['dom','lun','mar','mié','jue','vie','sáb'];
+  var dayNames = ['dom','lun','mar','mi\u00e9','jue','vie','s\u00e1b'];
   return { dayName: dayNames[d.getUTCDay()] + ' ' + (+parts[2]) };
 }
 
