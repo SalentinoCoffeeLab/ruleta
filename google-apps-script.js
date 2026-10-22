@@ -55,6 +55,21 @@ function getAdminPin() {
   return PropertiesService.getScriptProperties().getProperty('ADMIN_PIN') || '2610';
 }
 
+// ─── CODE NORMALIZATION ───
+function normalizeCode(raw) {
+  var c = (raw || '').trim().toUpperCase().replace(/\s/g, '');
+  // Add RTV- prefix if missing
+  if (c.length === 4 && /^[A-Z0-9]{4}$/.test(c)) c = 'RTV-' + c;
+  if (c.length === 7 && c.indexOf('-') === -1) c = 'RTV-' + c;
+  // O↔0 and I↔1 equivalence
+  c = c.replace(/O/g, '0').replace(/I/g, '1');
+  return c;
+}
+
+function normalizeStored(code) {
+  return String(code).trim().toUpperCase().replace(/O/g, '0').replace(/I/g, '1');
+}
+
 // ─── RATE LIMITING ───
 function checkRateLimit(fingerprint) {
   if (!fingerprint) return false;
@@ -123,7 +138,7 @@ function doPost(e) {
 
 // ─── ACTION: SPIN ───
 function handleSpin(data) {
-  var code = (data.code || '').trim().toUpperCase();
+  var code = normalizeCode(data.code || '');
   var name = (data.name || '').trim();
   var email = (data.email || '').trim();
   var phone = (data.phone || '').replace(/\D/g, '');
@@ -151,7 +166,7 @@ function handleSpin(data) {
     var codigosData = codigosSheet.getDataRange().getValues();
     var codeRow = -1;
     for (var i = 1; i < codigosData.length; i++) {
-      if (String(codigosData[i][1]).trim().toUpperCase() === code) {
+      if (normalizeStored(codigosData[i][1]) === code) {
         codeRow = i + 1; // 1-indexed for Sheet
         break;
       }
@@ -187,7 +202,7 @@ function handleSpin(data) {
 
     lock.releaseLock();
 
-    return jsonResponse({ status: 'ok', prize: prize });
+    return jsonResponse({ status: 'ok', prize: prize, ganado_en: ts });
 
   } catch (error) {
     try { lock.releaseLock(); } catch(e2) {}
@@ -195,9 +210,9 @@ function handleSpin(data) {
   }
 }
 
-// ─── ACTION: REDEEM (physical prizes — staff marks as delivered) ───
+// ─── ACTION: REDEEM (carrito/physical prizes — staff marks as delivered) ───
 function handleRedeem(data) {
-  var code = (data.code || '').trim().toUpperCase();
+  var code = normalizeCode(data.code || '');
   var pin = (data.pin || '').trim();
 
   if (pin !== getAdminPin()) {
@@ -212,7 +227,7 @@ function handleRedeem(data) {
     var codigosData = codigosSheet.getDataRange().getValues();
     var codeRow = -1;
     for (var i = 1; i < codigosData.length; i++) {
-      if (String(codigosData[i][1]).trim().toUpperCase() === code) {
+      if (normalizeStored(codigosData[i][1]) === code) {
         codeRow = i + 1;
         break;
       }
@@ -227,14 +242,24 @@ function handleRedeem(data) {
     var canjeadoEn = String(codigosData[codeRow - 1][8] || '').trim();
     if (canjeadoEn) {
       lock.releaseLock();
-      return jsonResponse({ status: 'error', error: 'ALREADY_REDEEMED' });
+      return jsonResponse({ status: 'error', error: 'ALREADY_REDEEMED', canjeado_en: canjeadoEn });
+    }
+
+    // Check expiry for carrito prizes
+    var premio = String(codigosData[codeRow - 1][3] || '').trim();
+    var ganado = String(codigosData[codeRow - 1][7] || '').trim();
+    var carritoPrizes = ['cafe', 'fria', 'collar', 'consolacion'];
+    if (carritoPrizes.indexOf(premio) >= 0 && ganado.slice(0, 10) !== colToday()) {
+      lock.releaseLock();
+      return jsonResponse({ status: 'error', error: 'EXPIRED', ganado_en: ganado });
     }
 
     // Mark as redeemed
-    codigosSheet.getRange(codeRow, 9).setValue(colTimestamp()); // I=canjeado_en
+    var ts = colTimestamp();
+    codigosSheet.getRange(codeRow, 9).setValue(ts); // I=canjeado_en
 
     lock.releaseLock();
-    return jsonResponse({ status: 'ok', redeemed: true });
+    return jsonResponse({ status: 'ok', redeemed: true, canjeado_en: ts });
 
   } catch (error) {
     try { lock.releaseLock(); } catch(e2) {}
@@ -244,7 +269,7 @@ function handleRedeem(data) {
 
 // ─── ACTION: CLAIM (tuboleta prizes — user submits cedula) ───
 function handleClaim(data) {
-  var code = (data.code || '').trim().toUpperCase();
+  var code = normalizeCode(data.code || '');
   var cedula = (data.cedula || '').trim();
   var claimName = (data.name || '').trim();
   var claimEmail = (data.email || '').trim();
@@ -257,7 +282,7 @@ function handleClaim(data) {
     var codigosData = codigosSheet.getDataRange().getValues();
     var codeRow = -1;
     for (var i = 1; i < codigosData.length; i++) {
-      if (String(codigosData[i][1]).trim().toUpperCase() === code) {
+      if (normalizeStored(codigosData[i][1]) === code) {
         codeRow = i + 1;
         break;
       }
@@ -297,6 +322,7 @@ function doGet(e) {
     var action = params.action || '';
 
     if (action === 'status') return handleStatus(params);
+    if (action === 'lookup') return handleLookup(params);
 
     // Default: API status
     return jsonResponse({
@@ -324,7 +350,7 @@ function handleStatus(params) {
     for (var i = 1; i < data.length; i++) {
       var usedFlag = String(data[i][2]).trim().toUpperCase();
       if (usedFlag === 'SI' || usedFlag === 'SÍ' || usedFlag === 'TRUE' || usedFlag === '1') {
-        usedCodes.push(String(data[i][1]).trim().toUpperCase());
+        usedCodes.push(normalizeStored(data[i][1]));
       }
     }
   }
@@ -335,6 +361,31 @@ function handleStatus(params) {
     prizes: counts,
     usedCodes: usedCodes
   });
+}
+
+// ─── ACTION: LOOKUP ───
+function handleLookup(params) {
+  var code = normalizeCode(params.code || '');
+  var codigosSheet = getSheet('codigos');
+  if (!codigosSheet) return jsonResponse({ status: 'error', error: 'SERVER_ERROR' });
+  var data = codigosSheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (normalizeStored(data[i][1]) === code) {
+      var usado = String(data[i][2]).trim().toUpperCase();
+      if (usado === 'SI' || usado === 'SÍ' || usado === 'TRUE' || usado === '1') {
+        return jsonResponse({
+          status: 'ok',
+          used: true,
+          prize: String(data[i][3]).trim(),
+          name: String(data[i][4]).trim(),
+          ganado_en: String(data[i][7]).trim(),
+          canjeado_en: String(data[i][8]).trim()
+        });
+      }
+      return jsonResponse({ status: 'ok', used: false });
+    }
+  }
+  return jsonResponse({ status: 'error', error: 'NOT_FOUND' });
 }
 
 // ─── UTILITY: Initialize codes sheet ───
@@ -396,12 +447,12 @@ function initResumen() {
   sheet.getRange('A8:D8').setFontWeight('bold');
 
   var prizes = [
-    { name: 'Café Salentino',       id: 'cafe',        cupo: CUPO_CAFE },
-    { name: 'Bebida Fría',          id: 'fria',        cupo: CUPO_FRIA },
-    { name: 'Collar Salentino',     id: 'collar',      cupo: CUPO_COLLAR },
-    { name: '20% Descuento',        id: 'desc20',      cupo: CUPO_DESC20 },
-    { name: 'Entrada Tuboleta',     id: 'entrada',     cupo: CUPO_ENTRADA },
-    { name: 'Descuento Consolación',id: 'consolacion', cupo: 9999 },
+    { name: 'Aeropress',          id: 'cafe',        cupo: CUPO_CAFE },
+    { name: 'Bebida fría',        id: 'fria',        cupo: CUPO_FRIA },
+    { name: 'Collar Ritvales',    id: 'collar',      cupo: CUPO_COLLAR },
+    { name: '20% boletería',      id: 'desc20',      cupo: CUPO_DESC20 },
+    { name: 'Entrada general',    id: 'entrada',     cupo: CUPO_ENTRADA },
+    { name: '15% café',           id: 'consolacion', cupo: 9999 },
   ];
 
   for (var i = 0; i < prizes.length; i++) {
@@ -416,21 +467,21 @@ function initResumen() {
     }
   }
 
-  // ── Section 3: Premios físicos pendientes por canjear ──
+  // ── Section 3: Premios del carrito pendientes hoy ──
   var secRow = 9 + prizes.length + 1;
-  sheet.getRange('A' + secRow).setValue('PREMIOS FÍSICOS PENDIENTES POR CANJEAR').setFontWeight('bold').setFontSize(11);
+  sheet.getRange('A' + secRow).setValue('PREMIOS DEL CARRITO PENDIENTES HOY').setFontWeight('bold').setFontSize(11);
   secRow++;
   sheet.getRange('A' + secRow).setValue('Premio');
   sheet.getRange('B' + secRow).setValue('Pendientes');
   sheet.getRange('A' + secRow + ':B' + secRow).setFontWeight('bold');
 
-  var physicalPrizes = ['cafe', 'fria', 'collar'];
-  for (var j = 0; j < physicalPrizes.length; j++) {
+  var carritoPrizes = ['cafe', 'fria', 'collar', 'consolacion'];
+  for (var j = 0; j < carritoPrizes.length; j++) {
     secRow++;
-    var pName = prizes.filter(function(p) { return p.id === physicalPrizes[j]; })[0].name;
+    var pName = prizes.filter(function(p) { return p.id === carritoPrizes[j]; })[0].name;
     sheet.getRange('A' + secRow).setValue(pName);
     // Ganado (premio = X) AND usado = SI AND canjeado_en está vacío
-    sheet.getRange('B' + secRow).setFormula('=COUNTIFS(codigos!D2:D201,"' + physicalPrizes[j] + '",codigos!I2:I201,"")');
+    sheet.getRange('B' + secRow).setFormula('=COUNTIFS(codigos!D2:D201,"' + carritoPrizes[j] + '",codigos!I2:I201,"",codigos!C2:C201,"SI")');
   }
 
   // ── Section 4: Últimas 10 jugadas ──
@@ -440,13 +491,13 @@ function initResumen() {
   sheet.getRange('A' + secRow).setValue('Número');
   sheet.getRange('B' + secRow).setValue('Código');
   sheet.getRange('C' + secRow).setValue('Premio');
-  sheet.getRange('D' + secRow).setValue('Nombre');
-  sheet.getRange('E' + secRow).setValue('Hora');
+  sheet.getRange('D' + secRow).setValue('Ganado');
+  sheet.getRange('E' + secRow).setValue('Canjeado');
   sheet.getRange('A' + secRow + ':E' + secRow).setFontWeight('bold');
   secRow++;
 
   // QUERY: last 10 played codes sorted by ganado_en descending
-  var queryFormula = '=IFERROR(QUERY(codigos!A2:J201,"SELECT A,B,D,E,H WHERE C=\'SI\' ORDER BY H DESC LIMIT 10",0),"Sin jugadas aún")';
+  var queryFormula = '=IFERROR(QUERY(codigos!A2:J201,"SELECT A,B,D,H,I WHERE C=\'SI\' ORDER BY H DESC LIMIT 10",0),"Sin jugadas aún")';
   sheet.getRange('A' + secRow).setFormula(queryFormula);
 
   // ── Formatting ──
