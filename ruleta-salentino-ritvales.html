@@ -314,154 +314,138 @@
     overflow-y: auto; -webkit-overflow-scrolling: touch;
     position: relative;
   }
-  /* Particle glow behind counter prize cards */
+  /* Particle glow */
   .result-screen .particle-glow-bg {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -55%);
+    position: absolute; top: 40%; left: 50%; transform: translate(-50%, -55%);
     width: 320px; height: 320px; border-radius: 50%; pointer-events: none;
     background: radial-gradient(circle, var(--accent-color, rgba(130,253,71,0.08)) 0%, transparent 70%);
     opacity: 0.4;
   }
+  .result-screen.winner .particle-glow-bg { opacity: 0.5; }
 
-  /* ─── PRIZE CARD (terminal box) ─── */
-  .prize-card {
-    position: relative;
-    border: 1px solid rgba(130,253,71,0.2);
-    background: rgba(130,253,71,0.02);
-    padding: 24px 16px 16px;
-    max-width: 340px; width: 100%;
-    opacity: 0; transform: translateY(30px) scale(0.95);
-    overflow: visible;
+  /* ─── RESULT LOGO ROW ─── */
+  .result-logo-row {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-bottom: 16px; opacity: 0;
   }
-  /* Top accent bar — color set by JS via --accent-color */
-  .prize-card::after {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: var(--accent-color, var(--green));
-  }
-  /* Corner square */
-  .prize-card::before {
-    content: ''; position: absolute; top: 3px; right: 3px;
-    width: 5px; height: 5px;
-    background: var(--accent-color, rgba(130,253,71,0.3));
-  }
-  .prize-card.glow {
-    border-color: var(--accent-color, rgba(130,253,71,0.35));
-  }
-  /* Pass tab label on prize card */
-  .prize-card[data-tab]::after {
-    content: attr(data-tab); position: absolute; top: -1px; left: 12px;
-    background: var(--accent-color, var(--green)); color: var(--black);
-    font-family: var(--mono); font-size: 8px; font-weight: 700;
-    letter-spacing: 2px; padding: 2px 8px; height: auto;
-  }
-  /* Counter instruction (show-this-screen prompt) */
-  .prize-instruction {
-    font-family: var(--mono); font-size: 11px; font-weight: 700;
-    letter-spacing: 2px; text-transform: uppercase;
-    color: var(--green); margin: 12px 0 4px; opacity: 0;
-  }
-  /* Consolacion discount code display */
-  .consolacion-code {
-    font-family: var(--mono); font-size: 24px; font-weight: 700;
-    letter-spacing: 4px; color: var(--off-white);
-    padding: 10px 16px; margin: 8px auto;
-    border: 1px solid rgba(130,253,71,0.2); display: inline-block;
-    opacity: 0;
+  .result-logo-row .logo-sal { height: 28px; }
+  .result-logo-row .logo-rtv { height: 28px; }
+  .result-logo-row .logo-x {
+    font-family: var(--mono); font-size: 14px; color: rgba(239,255,254,0.3);
   }
 
-  .result-screen .r-label {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 6px;
-    text-transform: uppercase; color: var(--green); margin-bottom: 4px; opacity: 0;
+  /* ─── PRIZE PILL ─── */
+  .prize-pill {
+    display: inline-block;
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    letter-spacing: 4px; text-transform: uppercase;
+    padding: 5px 18px;
+    background: var(--green); color: var(--black);
+    margin-bottom: 12px; opacity: 0;
   }
+  .result-screen.winner .prize-pill {
+    background: var(--accent-color, var(--orange)); color: var(--black);
+  }
+
+  /* ─── PRIZE TITLE & DESC ─── */
   .result-screen .r-name {
-    font-family: var(--grotesk); font-size: clamp(22px, 7vw, 32px); font-weight: 700;
+    font-family: var(--grotesk); font-weight: 700;
     color: var(--off-white); line-height: 1.1; margin-bottom: 10px; max-width: 300px; opacity: 0;
   }
   .result-screen .r-desc {
     font-size: 12px; color: rgba(239,255,254,0.7); line-height: 1.6; max-width: 280px;
     margin: 0 auto 14px; opacity: 0;
   }
-  .result-screen .r-divider {
-    width: 100%; height: 1px; margin: 0 auto 14px;
-    background: rgba(130,253,71,0.1);
-    opacity: 0;
-  }
-  .result-screen .r-player { display: none; }
 
-  .prize-clock {
-    font-family: var(--mono); font-size: 32px; font-weight: 700;
-    color: var(--off-white); letter-spacing: 2px; text-align: center;
-    margin: 0 0 6px; font-variant-numeric: tabular-nums;
-  }
-  .prize-clock.hidden { display: none; }
-  .prize-meta {
-    font-family: var(--mono); font-size: 9px; color: rgba(239,255,254,0.4);
-    letter-spacing: 0.3px; text-align: center; margin-bottom: 12px; line-height: 1.5;
-  }
-  .prize-status {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px;
-    text-align: center; margin: 0 auto 10px; font-weight: 400;
-    display: inline-block; padding: 6px 16px;
-    border: 1px solid transparent;
-  }
-  .prize-status-wrap { text-align: center; margin-bottom: 8px; }
-  .prize-status.pending { color: var(--green); border-color: rgba(130,253,71,0.25); }
-  .prize-status.redeemed { color: var(--steel); opacity: 0.5; border-color: rgba(255,255,255,0.08); }
-  .prize-status.expired { color: var(--red); text-decoration: line-through; border-color: rgba(255,75,67,0.15); }
-  .prize-redeem-link { font-family: var(--mono); font-size: 11px; color: rgba(239,255,254,0.4); text-decoration: underline; text-align: center; display: block; cursor: pointer; margin-top: 4px; }
-  .prize-redeem-link:hover { color: rgba(239,255,254,0.7); }
-
-  /* Winner (tuboleta / premio mayor) variant */
-  .result-screen.winner .prize-card {
-    border-color: var(--accent-color, rgba(236,110,37,0.25));
-    background: rgba(255,255,255,0.02);
-  }
-  .result-screen.winner .r-label { color: var(--accent-color, var(--orange)); }
-  .result-screen.winner .particle-glow-bg { opacity: 0.5; }
-
-  /* Cupo chip */
+  /* ─── CUPO CHIP ─── */
   .cupo-chip {
     display: inline-block; font-family: var(--mono); font-size: 9px; font-weight: 700;
     letter-spacing: 1.5px; text-transform: uppercase;
     color: var(--off-white); padding: 4px 12px;
     border: 1px solid rgba(255,255,255,0.12);
-    margin: 8px 0; opacity: 0;
+    margin: 4px 0 12px; opacity: 0;
   }
   .cupo-chip .cupo-num { color: var(--green); }
+
+  /* ─── PASS BOX (mostrador terminal box) ─── */
+  .pass-box {
+    max-width: 340px; width: 100%;
+    padding: 20px 16px 14px;
+    text-align: center; opacity: 0;
+  }
+  .pass-box[data-tab]::after {
+    content: attr(data-tab); position: absolute; top: -1px; left: 12px;
+    background: var(--accent-color, var(--green)); color: var(--black);
+    font-family: var(--mono); font-size: 8px; font-weight: 700;
+    letter-spacing: 2px; padding: 2px 8px;
+  }
+  .pass-name {
+    font-family: var(--mono); font-size: 14px; font-weight: 700;
+    letter-spacing: 2px; color: var(--off-white); text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .pass-ticket {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1px;
+    color: rgba(239,255,254,0.4); margin-bottom: 10px;
+  }
+  .pass-instruction {
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--green); margin: 8px 0 4px;
+  }
+  .consolacion-code {
+    font-family: var(--mono); font-size: 24px; font-weight: 700;
+    letter-spacing: 4px; color: var(--off-white);
+    padding: 10px 16px; margin: 8px auto;
+    border: 1px solid rgba(130,253,71,0.2); display: inline-block;
+  }
+  .pass-status-wrap { text-align: center; margin-top: 10px; margin-bottom: 4px; }
+  .pass-status {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px;
+    text-align: center; margin: 0 auto; font-weight: 400;
+    display: inline-block; padding: 6px 16px;
+    border: 1px solid transparent;
+  }
+  .pass-status.active { display: none; }
+  .pass-status.redeemed { color: var(--steel); opacity: 0.5; border-color: rgba(255,255,255,0.08); }
+  .pass-status.expired { color: var(--red); text-decoration: line-through; border-color: rgba(255,75,67,0.15); }
+  .pass-redeem-link { font-family: var(--mono); font-size: 11px; color: rgba(239,255,254,0.4); text-decoration: underline; text-align: center; display: block; cursor: pointer; margin-top: 4px; }
+  .pass-redeem-link:hover { color: rgba(239,255,254,0.7); }
+
+  /* ─── MAYOR BOX (tuboleta terminal box) ─── */
+  .mayor-box {
+    max-width: 340px; width: 100%;
+    padding: 20px 16px 14px;
+    text-align: center; opacity: 0;
+  }
+  .mayor-box[data-tab]::after {
+    content: attr(data-tab); position: absolute; top: -1px; left: 12px;
+    background: var(--accent-color, var(--green)); color: var(--black);
+    font-family: var(--mono); font-size: 7px; font-weight: 700;
+    letter-spacing: 1.5px; padding: 2px 6px;
+  }
+  .mayor-clock {
+    font-family: var(--mono); font-size: 28px; font-weight: 700;
+    color: var(--off-white); letter-spacing: 2px; text-align: center;
+    margin-top: 12px; font-variant-numeric: tabular-nums;
+  }
 
   /* Tuboleta sent state */
   .tuboleta-sent {
     text-align: center; padding: 16px 0;
   }
-  .tuboleta-sent .sent-icon {
-    font-family: var(--mono); font-size: 28px; color: var(--green);
-    margin-bottom: 8px;
+  .tuboleta-sent .sent-check {
+    width: 40px; height: 40px; margin: 0 auto 10px;
+  }
+  .tuboleta-sent .sent-check circle { fill: none; stroke: var(--green); stroke-width: 2; }
+  .tuboleta-sent .sent-check polyline { fill: none; stroke: var(--green); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .tuboleta-sent .sent-email {
+    font-family: var(--mono); font-size: 12px; color: var(--off-white);
+    margin-bottom: 6px; word-break: break-all;
   }
   .tuboleta-sent .sent-text {
-    font-family: var(--mono); font-size: 11px; color: var(--green);
-    letter-spacing: 2px; line-height: 1.6;
-  }
-
-  /* ─── DELIVER BUTTON ─── */
-  .btn-deliver {
-    font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase; padding: 14px 28px; cursor: pointer;
-    border: 1px solid var(--green); background: transparent; color: var(--green);
-    margin-top: 16px; margin-bottom: 8px;
-    transition: background 0.25s, color 0.25s, border-color 0.25s, transform 0.1s;
-    min-width: 280px; opacity: 0;
-  }
-  .btn-deliver:active { transform: scale(0.97); }
-  .btn-deliver.confirm {
-    background: var(--orange); color: var(--black); border-color: var(--orange);
-    animation: pulseConfirm 1s ease infinite;
-  }
-  @keyframes pulseConfirm {
-    0%, 100% { box-shadow: 0 0 12px rgba(236,110,37,0.15); }
-    50% { box-shadow: 0 0 24px rgba(236,110,37,0.35); }
-  }
-  .btn-deliver.delivered {
-    background: var(--green); color: var(--black); border-color: var(--green);
-    pointer-events: none;
+    font-family: var(--mono); font-size: 10px; color: var(--green);
+    letter-spacing: 2px; line-height: 1.6; text-transform: uppercase;
   }
 
   @keyframes fadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -750,40 +734,61 @@
 <!-- SCREEN 3: RESULT -->
 <div id="resultScreen" class="screen result-screen">
   <div class="particle-glow-bg" id="resultGlow" style="display:none;"></div>
-  <div class="prize-card" id="prizeCard">
-    <div class="r-label" id="rLabel"></div>
-    <div class="r-name" id="rName"></div>
-    <div class="r-divider" id="rDivider"></div>
-    <div class="r-desc" id="rDesc"></div>
-    <div class="prize-instruction" id="prizeInstruction" style="display:none;"></div>
-    <div class="consolacion-code" id="consolacionCode" style="display:none;"></div>
-    <div class="cupo-chip" id="cupoChip" style="display:none;"></div>
-    <div id="rDeliverWrap" style="display:none;"></div>
-    <div id="rTuboletaWrap" style="display:none;">
-      <div class="tuboleta-form" id="tuboletaForm">
-        <div class="form-group">
-          <span class="field-icon">ID</span>
-          <input type="text" id="tuboName" placeholder="Nombre completo" maxlength="60" autocomplete="name">
-        </div>
-        <div class="form-group">
-          <span class="field-icon">CC</span>
-          <input type="text" id="tuboCedula" placeholder="Número de cédula" maxlength="20" autocomplete="off" inputmode="numeric">
-        </div>
-        <div class="form-group">
-          <span class="field-icon">@</span>
-          <input type="email" id="tuboEmail" placeholder="Correo de cuenta TuboletaPass" autocomplete="email">
-        </div>
-      </div>
-      <div class="tuboleta-note">El premio llega a tu cuenta TuboletaPass. Usa el correo de esa cuenta; si no tienes una, créala con este mismo correo.</div>
-      <button class="btn-tuboleta" id="btnTuboleta" onclick="submitTuboleta()">ENVIAR DATOS A RITVALES</button>
-      <div class="tuboleta-confirm" id="tuboConfirm">Datos enviados. Ritvales te contactará.</div>
-    </div>
-    <div class="prize-clock" id="prizeClock"></div>
-    <div class="prize-meta" id="prizeMeta"></div>
-    <div class="prize-status-wrap"><div class="prize-status" id="prizeStatus"></div></div>
-    <a href="#" class="prize-redeem-link" id="prizeRedeemLink" style="display:none" onclick="event.preventDefault();redeemCarrito()">Canjear premio</a>
+
+  <!-- Logo row -->
+  <div class="result-logo-row" id="resultLogoRow">
+    <img class="logo-sal" src="" id="resultLogoSal" alt="Salentino">
+    <span class="logo-x">&times;</span>
+    <img class="logo-rtv" src="" id="resultLogoRtv" alt="Ritvales">
   </div>
-  <button class="btn-share-story" id="btnShareStory">COMPÁRTELO EN TU HISTORIA</button>
+
+  <!-- Prize pill -->
+  <div class="prize-pill" id="prizePill">GANASTE</div>
+
+  <!-- Prize title -->
+  <div class="r-name" id="rName"></div>
+
+  <!-- Prize description -->
+  <div class="r-desc" id="rDesc"></div>
+
+  <!-- Cupo chip (premio mayor only) -->
+  <div class="cupo-chip" id="cupoChip" style="display:none;"></div>
+
+  <!-- Pass terminal box (mostrador) -->
+  <div class="pass-box terminal-box" id="passBox" style="display:none;">
+    <div class="pass-name" id="passName"></div>
+    <div class="pass-ticket" id="passTicket"></div>
+    <div class="pass-instruction" id="passInstruction" style="display:none;"></div>
+    <div class="consolacion-code" id="consolacionCode" style="display:none;"></div>
+    <div class="pass-status-wrap">
+      <div class="pass-status" id="passStatus"></div>
+    </div>
+    <a href="#" class="pass-redeem-link" id="passRedeemLink" style="display:none" onclick="event.preventDefault();redeemCarrito()">Canjear premio</a>
+  </div>
+
+  <!-- Premio mayor terminal box (tuboleta) -->
+  <div class="mayor-box terminal-box" id="mayorBox" style="display:none;">
+    <div class="tuboleta-form" id="tuboletaForm">
+      <div class="form-group">
+        <span class="field-icon">ID</span>
+        <input type="text" id="tuboName" placeholder="Nombre completo" maxlength="60" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <span class="field-icon">CC</span>
+        <input type="text" id="tuboCedula" placeholder="N\u00famero de c\u00e9dula" maxlength="20" autocomplete="off" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <span class="field-icon">@</span>
+        <input type="email" id="tuboEmail" placeholder="Correo de cuenta TuboletaPass" autocomplete="email">
+      </div>
+    </div>
+    <div class="tuboleta-note">El premio llega a tu cuenta TuboletaPass. Usa el correo de esa cuenta; si no tienes una, cr\u00e9ala con este mismo correo.</div>
+    <button class="btn-tuboleta" id="btnTuboleta" onclick="submitTuboleta()">ENVIAR DATOS A RITVALES</button>
+    <div class="tuboleta-confirm" id="tuboConfirm"></div>
+    <div class="mayor-clock" id="prizeClock"></div>
+  </div>
+
+  <button class="btn-share-story" id="btnShareStory">COMP\u00c1RTELO EN TU HISTORIA</button>
   <div class="social-links">
     <a href="" class="social-link social-ig" target="_blank">
       Instagram <span class="social-at">@</span><span class="social-handle"></span>
@@ -791,8 +796,8 @@
     <span class="social-dot">&middot;</span>
     <a href="" class="social-link social-web" target="_blank"></a>
   </div>
-  <button class="btn-play-again" id="btnPlayAgain" onclick="playAgain()">¿OTRO CÓDIGO? GIRA DE NUEVO</button>
-  <div class="footer-phrase">LENTO DE ORIGEN - RÁPIDO DE TOMAR</div>
+  <button class="btn-play-again" id="btnPlayAgain" onclick="playAgain()">\u00bfOTRO C\u00d3DIGO? GIRA DE NUEVO</button>
+  <div class="footer-phrase">LENTO DE ORIGEN - R\u00c1PIDO DE TOMAR</div>
 </div>
 
 <!-- SCREEN 4: ALREADY PLAYED -->
@@ -964,12 +969,12 @@ function trackEvent(event, extra) {
 // PRIZES (6 segments — server decides which one)
 // ═══════════════════════════════════════════════════════════
 var PRIZES = [
-  { id: 'cafe',        label: 'AEROPRESS',            title: 'Aeropress',           color: '#EFFFFE', textColor: '#020102', cupo: 30, desc: 'Muestra esta pantalla en el punto Salentino. Válido solo hoy.', type: 'carrito' },
-  { id: 'fria',        label: 'BEBIDA FRÍA',          title: 'Bebida fría',         color: '#82FD47', textColor: '#020102', cupo: 15, desc: 'Elige entre ' + OPCIONES_FRIAS + ' en el punto Salentino. Válido solo hoy.', type: 'carrito' },
-  { id: 'collar',      label: 'COLLAR\nRITVALES',     title: 'Collar Ritvales',     color: '#7D3BED', textColor: '#EFFFFE', cupo: 10, desc: 'Collar oficial Ritvales 2026. Reclámalo en el punto Salentino. Válido solo hoy.', type: 'carrito' },
-  { id: 'desc20',      label: '20% DCTO\nRITVALES',   title: '20 % en boletería',   color: '#224FD1', textColor: '#EFFFFE', cupo: 8,  desc: '20 % de descuento en boletería Ritvales. Completa tus datos y te enviaremos el código.', type: 'tuboleta' },
-  { id: 'entrada',     label: 'ENTRADA\nRITVALES',    title: 'Entrada general',     color: '#FF4B43', textColor: '#EFFFFE', cupo: 3,  desc: '1 entrada general para Ritvales. Completa tus datos y te la enviaremos.', type: 'tuboleta' },
-  { id: 'consolacion', label: CONSOLACION_PCT + '% DCTO\nCAFÉ', title: 'Descuento Salentino', color: '#AEE1F6', textColor: '#020102', cupo: 9999, desc: CONSOLACION_PCT + ' % de descuento en salentino.co. Válido por 30 días.', type: 'consolacion' },
+  { id: 'cafe',        label: 'AEROPRESS',            title: 'Aeropress',           color: '#EFFFFE', textColor: '#020102', uiColor: '#EFFFFE', textOnColor: '#020102', titleSize: 28, cupo: 30, desc: 'Muestra esta pantalla en el punto Salentino. V\u00e1lido solo hoy.', type: 'mostrador' },
+  { id: 'fria',        label: 'BEBIDA FR\u00cdA',     title: 'Bebida fr\u00eda',    color: '#82FD47', textColor: '#020102', uiColor: '#82FD47', textOnColor: '#020102', titleSize: 28, cupo: 15, desc: 'Elige entre Signal, Analog o Frequency en el punto Salentino. V\u00e1lido solo hoy.', type: 'mostrador' },
+  { id: 'collar',      label: 'COLLAR\nRITVALES',     title: 'Collar Ritvales',     color: '#7D3BED', textColor: '#EFFFFE', uiColor: '#B591F7', textOnColor: '#020102', titleSize: 28, cupo: 10, desc: 'Collar oficial Ritvales 2026. Recl\u00e1malo en el punto Salentino. V\u00e1lido solo hoy.', type: 'mostrador' },
+  { id: 'desc20',      label: '20% DCTO\nBOLETER\u00cdA', title: '20 % en boletería', color: '#224FD1', textColor: '#EFFFFE', uiColor: '#6F8FF0', textOnColor: '#020102', titleSize: 24, cupo: 8,  desc: '20 % de descuento en boleter\u00eda Ritvales. Completa tus datos y te enviaremos el c\u00f3digo.', type: 'tuboleta' },
+  { id: 'entrada',     label: 'ENTRADA\nGENERAL',     title: 'Entrada general',     color: '#FF4B43', textColor: '#EFFFFE', uiColor: '#FF4B43', textOnColor: '#EFFFFE', titleSize: 24, cupo: 3,  desc: '1 entrada general para Ritvales. Completa tus datos y te la enviaremos.', type: 'tuboleta' },
+  { id: 'consolacion', label: CONSOLACION_PCT + '% DCTO\nCAF\u00c9', title: 'Descuento Salentino', color: '#AEE1F6', textColor: '#020102', uiColor: '#AEE1F6', textOnColor: '#020102', titleSize: 24, cupo: 9999, desc: CONSOLACION_PCT + ' % en caf\u00e9s especiales Salentino. V\u00e1lido por 30 d\u00edas.', type: 'mostrador' },
 ];
 
 var SEGMENTS = PRIZES.length;
@@ -1252,6 +1257,7 @@ function submitAndSpin() {
       currentResultCode = code;
       currentGanadoEn = data.ganado_en || TODAY;
       lastSpinCupo = (typeof data.cupo === 'number') ? data.cupo : null;
+      lastSpinNumero = data.n || null;
       saveLocalPlayed({ date: TODAY, prize: prize.id, name: name, code: code, type: prize.type });
       showWheelAndSpin(name, prize, currentGanadoEn);
     } else {
@@ -1415,6 +1421,7 @@ var currentResultCode = null;
 var currentGanadoEn = null;
 var prizeClockInterval = null;
 var lastSpinCupo = null;
+var lastSpinNumero = null;
 
 function colClockStr() {
   return new Intl.DateTimeFormat('es-CO', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false, timeZone: 'America/Bogota' }).format(new Date());
@@ -1427,51 +1434,43 @@ function colDateParts(dateStr) {
   return { dayName: dayNames[d.getUTCDay()] + ' ' + (+parts[2]) };
 }
 
-function updatePrizeCard(prize, playerName, code, ganadoEn, canjeadoEn) {
-  var clockEl = document.getElementById('prizeClock');
-  var metaEl = document.getElementById('prizeMeta');
-  var statusEl = document.getElementById('prizeStatus');
-  var redeemEl = document.getElementById('prizeRedeemLink');
-  var isCounter = (prize.type === 'carrito' || prize.type === 'consolacion');
-
-  // Live clock — only for tuboleta (premio mayor)
-  if (prizeClockInterval) { clearInterval(prizeClockInterval); prizeClockInterval = null; }
-  if (!isCounter) {
-    function tickClock() { clockEl.textContent = colClockStr(); }
-    tickClock();
-    prizeClockInterval = setInterval(tickClock, 1000);
-  }
-
-  // Meta line: name · code · Ganado sáb 24 HH:MM
+function updatePassBox(prize, playerName, code, ganadoEn, canjeadoEn) {
+  var statusEl = document.getElementById('passStatus');
+  var redeemEl = document.getElementById('passRedeemLink');
   var ganadoParts = colDateParts(ganadoEn || TODAY);
-  var ganadoTime = new Intl.DateTimeFormat('es-CO', { hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'America/Bogota' }).format(new Date());
-  metaEl.textContent = (playerName || '') + ' · ' + (code || '') + ' · Ganado ' + ganadoParts.dayName + ' ' + ganadoTime;
+
+  // Name and ticket
+  document.getElementById('passName').textContent = (playerName || '').toUpperCase();
+  document.getElementById('passTicket').textContent = 'TICKET #' + (lastSpinNumero || code || '---');
 
   // Status
-  statusEl.className = 'prize-status';
+  statusEl.className = 'pass-status';
   redeemEl.style.display = 'none';
 
   if (canjeadoEn) {
     statusEl.classList.add('redeemed');
     statusEl.textContent = 'Canjeado a las ' + canjeadoEn.split(' ').pop().substring(0,5) + '.';
-  } else if (prize.type === 'carrito') {
-    // Check if expired (ganado_en != today)
-    if (ganadoEn && ganadoEn !== TODAY) {
+  } else if (prize.id === 'consolacion') {
+    // consolacion: 30-day expiry, no redeem link
+    statusEl.classList.add('active');
+  } else {
+    // cafe/fria/collar: same-day expiry
+    if (ganadoEn && ganadoEn.slice(0,10) !== TODAY) {
       statusEl.classList.add('expired');
-      statusEl.textContent = 'Vencido. Este premio era válido el ' + ganadoParts.dayName + '.';
+      statusEl.textContent = 'Vencido. Este premio era v\u00e1lido el ' + ganadoParts.dayName + '.';
     } else {
-      statusEl.classList.add('pending');
-      statusEl.textContent = 'Pendiente por reclamar';
+      statusEl.classList.add('active');
       redeemEl.style.display = '';
     }
-  } else if (prize.type === 'consolacion') {
-    statusEl.classList.add('pending');
-    statusEl.textContent = 'Pendiente por reclamar';
-  } else {
-    // tuboleta — no redeem link
-    statusEl.classList.add('pending');
-    statusEl.textContent = 'Pendiente';
   }
+}
+
+function updateMayorBox(prize) {
+  var clockEl = document.getElementById('prizeClock');
+  if (prizeClockInterval) { clearInterval(prizeClockInterval); prizeClockInterval = null; }
+  function tickClock() { clockEl.textContent = colClockStr(); }
+  tickClock();
+  prizeClockInterval = setInterval(tickClock, 1000);
 }
 
 function redeemCarrito() {
@@ -1523,12 +1522,11 @@ function confirmRedeem() {
     if (data.status === 'ok') {
       trackEvent('redeem_ok', currentResultCode);
       closeRedeemSheet();
-      var statusEl = document.getElementById('prizeStatus');
-      statusEl.className = 'prize-status redeemed';
+      var statusEl = document.getElementById('passStatus');
+      statusEl.className = 'pass-status redeemed';
       statusEl.textContent = 'Canjeado a las ' + colClockStr().substring(0,5) + '.';
-      document.getElementById('prizeRedeemLink').style.display = 'none';
-      // Hide instruction
-      document.getElementById('prizeInstruction').style.display = 'none';
+      document.getElementById('passRedeemLink').style.display = 'none';
+      document.getElementById('passInstruction').style.display = 'none';
     } else if (data.error === 'EXPIRED') {
       errorEl.textContent = 'Premio vencido.';
       btn.disabled = false; btn.textContent = 'CANJEAR';
@@ -1583,121 +1581,139 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   currentResultPrize = prize;
   currentResultPlayer = playerName;
   currentGanadoEn = ganadoEn || TODAY;
-  var isCounter = (prize.type === 'carrito' || prize.type === 'consolacion');
-  var isWinner = (prize.type === 'tuboleta');
+  var isMostrador = (prize.type === 'mostrador');
+  var isMayor = (prize.type === 'tuboleta');
   hideAllScreens();
   var screen = document.getElementById('resultScreen');
   screen.classList.add('active');
-  if (isWinner) screen.classList.add('winner');
+  if (isMayor) screen.classList.add('winner');
 
-  document.getElementById('rLabel').textContent = 'GANASTE';
+  // Use uiColor for UI accent
+  var accent = prize.uiColor || prize.color;
+  screen.style.setProperty('--accent-color', accent);
+
+  // Logos — copy from entry screen
+  var salLogo = document.querySelector('.entry-screen .logo-salentino');
+  var rtvLogo = document.querySelector('.entry-screen .logo-ritvales');
+  if (salLogo) document.getElementById('resultLogoSal').src = salLogo.src;
+  if (rtvLogo) document.getElementById('resultLogoRtv').src = rtvLogo.src;
+
+  // Pill
+  var pillEl = document.getElementById('prizePill');
+  pillEl.textContent = isMayor ? 'PREMIO MAYOR' : 'GANASTE';
+
+  // Title + desc
+  document.getElementById('rName').style.fontSize = (prize.titleSize || 28) + 'px';
   document.getElementById('rDesc').textContent = prize.desc;
 
-  var deliverWrap = document.getElementById('rDeliverWrap');
-  var tuboletaWrap = document.getElementById('rTuboletaWrap');
-  var instructionEl = document.getElementById('prizeInstruction');
-  var consolacionCodeEl = document.getElementById('consolacionCode');
+  // Glow
   var glowEl = document.getElementById('resultGlow');
-  var clockEl = document.getElementById('prizeClock');
-  var prizeCard = document.getElementById('prizeCard');
-
-  // Reset elements
-  var cupoChipEl = document.getElementById('cupoChip');
-  deliverWrap.style.display = 'none';
-  tuboletaWrap.style.display = 'none';
-  instructionEl.style.display = 'none';
-  consolacionCodeEl.style.display = 'none';
-  cupoChipEl.style.display = 'none';
-  glowEl.style.display = 'none';
-  clockEl.classList.remove('hidden');
-  prizeCard.removeAttribute('data-tab');
-
-  // All prize types get a particle glow
   glowEl.style.display = '';
 
-  if (isCounter) {
-    // Counter prizes: pass tab, no clock
-    clockEl.classList.add('hidden');
-    prizeCard.setAttribute('data-tab', prize.type === 'consolacion' ? 'DESCUENTO' : 'PASE');
+  // Reset both boxes
+  var passBox = document.getElementById('passBox');
+  var mayorBox = document.getElementById('mayorBox');
+  var cupoChipEl = document.getElementById('cupoChip');
+  passBox.style.display = 'none';
+  passBox.removeAttribute('data-tab');
+  mayorBox.style.display = 'none';
+  mayorBox.removeAttribute('data-tab');
+  cupoChipEl.style.display = 'none';
 
-    if (prize.type === 'carrito') {
-      instructionEl.textContent = 'MUESTRA ESTA PANTALLA';
-      instructionEl.style.display = '';
-    } else if (prize.type === 'consolacion') {
-      consolacionCodeEl.textContent = currentResultCode || '---';
-      consolacionCodeEl.style.display = '';
+  if (isMostrador) {
+    // Pass box
+    passBox.style.display = '';
+    passBox.style.setProperty('--accent-color', accent);
+    passBox.setAttribute('data-tab', prize.id === 'consolacion' ? 'DESCUENTO' : '_PASE');
+
+    // Instruction
+    var instrEl = document.getElementById('passInstruction');
+    var codeEl = document.getElementById('consolacionCode');
+    instrEl.style.display = 'none';
+    codeEl.style.display = 'none';
+
+    if (prize.id !== 'consolacion') {
+      instrEl.textContent = 'MUESTRA ESTA PANTALLA';
+      instrEl.style.display = '';
+    } else {
+      codeEl.textContent = currentResultCode || '---';
+      codeEl.style.display = '';
     }
-  } else if (isWinner) {
-    // Premio mayor: tab label, cupo chip, tuboleta form
-    prizeCard.setAttribute('data-tab', 'PREMIO MAYOR');
-    tuboletaWrap.style.display = 'block';
+
+    updatePassBox(prize, playerName, currentResultCode, currentGanadoEn, canjeadoEn);
+
+  } else if (isMayor) {
+    // Cupo chip
+    var prizeObj = PRIZES.find(function(p) { return p.id === prize.id; });
+    var totalCupo = prizeObj ? prizeObj.cupo : '?';
+    if (typeof lastSpinCupo !== 'undefined' && lastSpinCupo !== null) {
+      cupoChipEl.innerHTML = 'QUEDAN <span class="cupo-num">' + lastSpinCupo + '</span> DE ' + totalCupo;
+      cupoChipEl.style.display = '';
+    }
+
+    // Mayor box
+    mayorBox.style.display = '';
+    mayorBox.style.setProperty('--accent-color', accent);
+    mayorBox.setAttribute('data-tab', 'LA PISTA DE BAILE ES SAGRADA');
+
+    // Reset form
+    document.getElementById('tuboletaForm').style.display = '';
     document.getElementById('tuboName').value = currentResultPlayer || '';
     document.getElementById('tuboCedula').value = '';
     document.getElementById('tuboEmail').value = '';
     document.getElementById('btnTuboleta').disabled = false;
     document.getElementById('btnTuboleta').textContent = 'ENVIAR DATOS A RITVALES';
+    document.getElementById('btnTuboleta').style.display = '';
     document.getElementById('tuboConfirm').classList.remove('visible');
+    document.getElementById('tuboConfirm').innerHTML = '';
 
-    // Cupo chip (remaining quota)
-    if (typeof lastSpinCupo !== 'undefined' && lastSpinCupo !== null) {
-      cupoChipEl.innerHTML = 'QUEDAN <span class="cupo-num">' + lastSpinCupo + '</span>';
-      cupoChipEl.style.display = '';
-    }
+    updateMayorBox(prize);
   }
-
-  // Set accent color on card and glow
-  prizeCard.style.setProperty('--accent-color', prize.color);
-  screen.style.setProperty('--accent-color', prize.color);
-
-  updatePrizeCard(prize, playerName, currentResultCode, currentGanadoEn, canjeadoEn);
 
   // GSAP Timeline
   if (typeof gsap === 'undefined') {
-    prizeCard.style.opacity = '1'; prizeCard.style.transform = 'none';
-    document.getElementById('rName').textContent = prize.title;
-    ['rLabel','rName','rDesc','rDivider','btnPlayAgain','btnShareStory','prizeInstruction','consolacionCode','cupoChip'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
-    });
+    document.getElementById('resultLogoRow').style.opacity = '1';
+    pillEl.style.opacity = '1';
+    document.getElementById('rName').textContent = prize.title.toUpperCase();
+    document.getElementById('rName').style.opacity = '1';
+    document.getElementById('rDesc').style.opacity = '1';
+    if (isMostrador) { passBox.style.opacity = '1'; }
+    if (isMayor) { mayorBox.style.opacity = '1'; cupoChipEl.style.opacity = '1'; }
+    document.getElementById('btnShareStory').style.opacity = '1';
+    document.getElementById('btnPlayAgain').style.opacity = '1';
     launchConfetti();
     return;
   }
+
   var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-  gsap.set(prizeCard, { opacity: 0, y: 30, scale: 0.95 });
-  gsap.set(['#rLabel', '#rDesc', '#rDivider', '#btnShareStory', '#btnPlayAgain'], { opacity: 0, y: 15 });
-  if (isCounter) {
-    gsap.set(['#prizeInstruction', '#consolacionCode'], { opacity: 0, y: 10 });
-  }
-  if (isWinner) {
-    gsap.set(['#cupoChip'], { opacity: 0, y: 10 });
+  gsap.set(['#resultLogoRow', '#prizePill', '#rName', '#rDesc', '#btnShareStory', '#btnPlayAgain'], { opacity: 0, y: 15 });
+  if (isMostrador) gsap.set('#passBox', { opacity: 0, y: 20 });
+  if (isMayor) {
+    gsap.set('#mayorBox', { opacity: 0, y: 20 });
+    gsap.set('#cupoChip', { opacity: 0, y: 10 });
   }
 
-  tl.to(prizeCard, { opacity: 1, y: 0, scale: 1, duration: 0.6 })
-    .to('#rLabel', { opacity: 0.6, y: 0, duration: 0.3 }, '-=0.1')
+  tl.to('#resultLogoRow', { opacity: 1, y: 0, duration: 0.35 })
+    .to('#prizePill', { opacity: 1, y: 0, duration: 0.3 }, '-=0.1')
     .call(function() {
       decodeReveal(document.getElementById('rName'), prize.title.toUpperCase());
     })
-    .to('#rDivider', { opacity: 1, y: 0, duration: 0.3 }, '+=0.3')
-    .to('#rDesc', { opacity: 1, y: 0, duration: 0.35 }, '-=0.1');
+    .to('#rDesc', { opacity: 1, y: 0, duration: 0.35 }, '+=0.3');
 
-  // Type-specific reveals
-  if (prize.type === 'carrito') {
-    tl.to('#prizeInstruction', { opacity: 1, y: 0, duration: 0.3 }, '-=0.05');
-  } else if (prize.type === 'consolacion') {
-    tl.to('#consolacionCode', { opacity: 1, y: 0, duration: 0.4 }, '-=0.05');
-  } else if (isWinner) {
-    if (cupoChipEl.style.display !== 'none') {
-      tl.to('#cupoChip', { opacity: 1, y: 0, duration: 0.3 }, '-=0.05');
-    }
-    gsap.set('#rTuboletaWrap', { opacity: 0, y: 15 });
-    tl.to('#rTuboletaWrap', { opacity: 1, y: 0, duration: 0.4 }, '-=0.05');
+  if (isMayor && cupoChipEl.style.display !== 'none') {
+    tl.to('#cupoChip', { opacity: 1, y: 0, duration: 0.3 }, '-=0.05');
+  }
+
+  if (isMostrador) {
+    tl.to('#passBox', { opacity: 1, y: 0, duration: 0.4 }, '-=0.05');
+  } else if (isMayor) {
+    tl.to('#mayorBox', { opacity: 1, y: 0, duration: 0.4 }, '-=0.05');
   }
 
   tl.to('#btnShareStory', { opacity: 1, y: 0, duration: 0.35 }, '+=0.2');
   tl.to('#btnPlayAgain', { opacity: 1, y: 0, duration: 0.4 }, '-=0.1');
 
-  // Confetti for all prizes
   launchConfetti();
   trackEvent('prize_reveal', prize.id);
 }
@@ -1715,6 +1731,7 @@ function playAgain() {
   goBtn.disabled = false; goBtn.textContent = 'GIRAR LA RULETA';
   isSubmitting = false;
   lastSpinCupo = null;
+  lastSpinNumero = null;
   clearErrors();
   if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
   if (prizeClockInterval) { clearInterval(prizeClockInterval); prizeClockInterval = null; }
@@ -1750,18 +1767,18 @@ function submitTuboleta() {
   }).then(function(data) {
     if (data.status === 'ok') {
       trackEvent('tuboleta_sent', currentResultCode);
-      // Replace form with sent state
       document.getElementById('tuboletaForm').style.display = 'none';
       btn.style.display = 'none';
-      var confirm = document.getElementById('tuboConfirm');
-      confirm.innerHTML = '<div class="tuboleta-sent"><div class="sent-icon">&#10003;</div><div class="sent-text">DATOS ENVIADOS<br>Ritvales te contactar\u00e1.</div></div>';
-      confirm.classList.add('visible');
-    } else if (data.error === 'ALREADY_REDEEMED') {
+      var sentSvg = '<svg class="sent-check" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18"/><polyline points="12,20 18,26 28,14"/></svg>';
+      var confirmEl = document.getElementById('tuboConfirm');
+      confirmEl.innerHTML = '<div class="tuboleta-sent">' + sentSvg + '<div class="sent-email">' + email + '</div><div class="sent-text">GUARDA ESTA PANTALLA</div></div>';
+      confirmEl.classList.add('visible');
+    } else if (data.error === 'ALREADY_REDEEMED' || data.error === 'ALREADY_CLAIMED') {
       document.getElementById('tuboletaForm').style.display = 'none';
       btn.style.display = 'none';
-      var confirm = document.getElementById('tuboConfirm');
-      confirm.innerHTML = '<div class="tuboleta-sent"><div class="sent-text">YA ENVIASTE TUS DATOS<br>Ritvales te contactar\u00e1.</div></div>';
-      confirm.classList.add('visible');
+      var confirmEl = document.getElementById('tuboConfirm');
+      confirmEl.innerHTML = '<div class="tuboleta-sent"><div class="sent-text">YA ENVIASTE TUS DATOS</div></div>';
+      confirmEl.classList.add('visible');
     } else {
       btn.textContent = 'ERROR — REINTENTAR';
       btn.disabled = false;
@@ -2010,7 +2027,7 @@ function generateStoryImage() {
   var cx = W / 2;
 
   // Prize color accent line
-  ctx.fillStyle = currentResultPrize.color;
+  ctx.fillStyle = (currentResultPrize.uiColor || currentResultPrize.color);
   ctx.fillRect(cx - 120, 580, 240, 3);
 
   // "GANASTE" label
@@ -2045,7 +2062,7 @@ function generateStoryImage() {
 
   // Prize accent bar below name
   var barY = startY + (lines.length - 1) * lineH + 40;
-  ctx.fillStyle = currentResultPrize.color;
+  ctx.fillStyle = (currentResultPrize.uiColor || currentResultPrize.color);
   ctx.fillRect(cx - 120, barY, 240, 3);
 
   // Description

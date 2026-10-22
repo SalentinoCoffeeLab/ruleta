@@ -59,6 +59,10 @@ function getAdminPin() {
   return PropertiesService.getScriptProperties().getProperty('ADMIN_PIN') || '2610';
 }
 
+function isTestMode() {
+  return PropertiesService.getScriptProperties().getProperty('TEST_MODE') === 'true';
+}
+
 function isUsed(flag) {
   var f = String(flag).trim().toUpperCase();
   return f === 'SI' || f === 'SÍ' || f === 'TRUE' || f === '1';
@@ -194,9 +198,12 @@ function handleSpin(data) {
   var email = (data.email || '').trim();
   var phone = (data.phone || '').replace(/\D/g, '');
   var fingerprint = data.fingerprint || '';
+  var forzar = (data.forzar || '').trim();
+  var testMode = isTestMode();
 
-  // Rate limit check
-  if (checkRateLimit(fingerprint)) {
+  // Rate limit check (skip for test codes)
+  var isTestCode = testMode && code.indexOf('TEST-') === 0;
+  if (!isTestCode && checkRateLimit(fingerprint)) {
     return jsonResponse({ status: 'error', error: 'RATE_LIMIT' });
   }
 
@@ -204,7 +211,13 @@ function handleSpin(data) {
   lock.waitLock(15000);
 
   try {
-    var codigosSheet = getSheet('codigos');
+    // Test codes: use codigos_prueba sheet, reusable
+    var codigosSheet;
+    if (isTestCode) {
+      codigosSheet = getSheet('codigos_prueba');
+    } else {
+      codigosSheet = getSheet('codigos');
+    }
     var logSheet = getSheet('log');
 
     if (!codigosSheet || !logSheet) {
@@ -212,8 +225,6 @@ function handleSpin(data) {
       return jsonResponse({ status: 'error', error: 'SERVER_ERROR', message: 'Sheets not found' });
     }
 
-    // Find code in codigos sheet
-    // Columns: A=numero(0), B=codigo(1), C=usado(2), D=premio(3), E=nombre(4), F=email(5), G=whatsapp(6), H=ganado_en(7), I=canjeado_en(8), J=cedula(9), K=datos_enviados(10)
     var codigosData = codigosSheet.getDataRange().getValues();
     var found = findCodeRow(codigosData, code);
 
@@ -222,29 +233,41 @@ function handleSpin(data) {
       return jsonResponse({ status: 'error', error: 'NOT_FOUND' });
     }
 
-    // Check if already used
-    if (isUsed(codigosData[found.index][2])) {
+    // Check if already used (skip for test codes — they are reusable)
+    if (!isTestCode && isUsed(codigosData[found.index][2])) {
       lock.releaseLock();
       return jsonResponse({ status: 'error', error: 'USED' });
     }
 
     // Select prize server-side
     var today = colToday();
-    var prize = pickPrize(logSheet, today);
+    var prize;
+    // Force prize if TEST_MODE and forzar param provided
+    if (testMode && forzar) {
+      var valid = PRIZE_CONFIG.some(function(p) { return p.id === forzar; });
+      prize = valid ? forzar : pickPrize(logSheet, today);
+    } else {
+      prize = pickPrize(logSheet, today);
+    }
     var ts = colTimestamp();
     var counts = countPrizesToday(logSheet, today);
-    // Count this spin into counts for remaining calc
     counts[prize] = (counts[prize] || 0) + 1;
     var remaining = getRemainingQuotas(counts);
     var numero = String(codigosData[found.index][0]).trim();
 
-    // Mark code as used in codigos sheet
-    codigosSheet.getRange(found.row, 3).setValue('SI');      // C=usado
-    codigosSheet.getRange(found.row, 4).setValue(prize);     // D=premio
-    codigosSheet.getRange(found.row, 5).setValue(name);      // E=nombre
-    codigosSheet.getRange(found.row, 6).setValue(email);     // F=email
-    codigosSheet.getRange(found.row, 7).setValue(phone);     // G=whatsapp
-    codigosSheet.getRange(found.row, 8).setValue(ts);        // H=ganado_en
+    if (isTestCode) {
+      // Test codes: reset for reuse, log but don't mark permanently
+      codigosSheet.getRange(found.row, 4).setValue(prize);
+      codigosSheet.getRange(found.row, 8).setValue(ts);
+    } else {
+      // Mark code as used in codigos sheet
+      codigosSheet.getRange(found.row, 3).setValue('SI');      // C=usado
+      codigosSheet.getRange(found.row, 4).setValue(prize);     // D=premio
+      codigosSheet.getRange(found.row, 5).setValue(name);      // E=nombre
+      codigosSheet.getRange(found.row, 6).setValue(email);     // F=email
+      codigosSheet.getRange(found.row, 7).setValue(phone);     // G=whatsapp
+      codigosSheet.getRange(found.row, 8).setValue(ts);        // H=ganado_en
+    }
 
     // Log the play
     logSheet.appendRow([ts, name, email, phone, code, prize, ts]);
@@ -665,4 +688,29 @@ function initResumen() {
   // Protect sheet as read-only
   var protection = sheet.protect().setDescription('Resumen - Solo lectura');
   protection.setWarningOnly(true);
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILITY: Initialize test codes sheet
+// Run manually. Set Script Properties: TEST_MODE = true
+// ═══════════════════════════════════════════════════════════
+function initTestCodes() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('codigos_prueba');
+  if (!sheet) {
+    sheet = ss.insertSheet('codigos_prueba');
+  } else {
+    sheet.clear();
+  }
+
+  // Same columns as codigos
+  sheet.getRange(1, 1, 1, 11).setValues([['numero', 'codigo', 'usado', 'premio', 'nombre', 'email', 'whatsapp', 'ganado_en', 'canjeado_en', 'cedula', 'datos_enviados']]);
+
+  var pad3 = function(n) { return n < 10 ? '00' + n : n < 100 ? '0' + n : '' + n; };
+  var rows = [];
+  for (var i = 1; i <= 10; i++) {
+    rows.push([pad3(900 + i), 'TEST-' + pad3(i + 0), '', '', '', '', '', '', '', '', '']);
+  }
+  // TEST-001 through TEST-010
+  sheet.getRange(2, 1, rows.length, 11).setValues(rows);
 }
