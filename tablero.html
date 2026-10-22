@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>Tablero — Salentino × Ritvales 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #020102;
+    --off-white: #EFFFFE;
+    --green: #82FD47;
+    --purple: #7D3BED;
+    --cobalt: #224FD1;
+    --red: #FF4B43;
+    --orange: #EC6E25;
+    --steel: #AEE1F6;
+    --grotesk: 'Space Grotesk', sans-serif;
+    --mono: 'Space Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1280px; height: 720px; overflow: hidden;
+    background: var(--black); color: var(--off-white);
+    font-family: var(--grotesk);
+  }
+
+  /* Scanlines */
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 100;
+    background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(130,253,71,0.02) 3px, rgba(130,253,71,0.02) 4px);
+  }
+
+  .board {
+    display: flex; flex-direction: column;
+    width: 1280px; height: 720px;
+    padding: 28px 40px 20px;
+  }
+
+  /* Header */
+  .board-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .board-title {
+    font-family: var(--grotesk); font-size: 28px; font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .board-title .hl { color: var(--green); }
+  .board-meta {
+    font-family: var(--mono); font-size: 12px; color: var(--green);
+    opacity: 0.4; letter-spacing: 2px;
+  }
+  .board-clock {
+    font-family: var(--mono); font-size: 20px; font-weight: 700;
+    color: var(--green); letter-spacing: 2px; font-variant-numeric: tabular-nums;
+  }
+  .board-status {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+    opacity: 0.3; margin-top: 2px; text-align: right;
+  }
+  .board-status.ok { color: var(--green); }
+  .board-status.err { color: var(--red); }
+
+  /* Prize grid */
+  .prize-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    flex: 1;
+  }
+  .prize-tile {
+    position: relative;
+    border: 1px solid rgba(130,253,71,0.12);
+    padding: 20px 16px 16px;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+  }
+  .prize-tile::after {
+    content: attr(data-tab); position: absolute; top: -1px; left: 10px;
+    font-family: var(--mono); font-size: 7px; font-weight: 700;
+    letter-spacing: 2px; padding: 2px 6px;
+    background: var(--tile-color, var(--green)); color: var(--black);
+  }
+  .prize-tile::before {
+    content: ''; position: absolute; top: 3px; right: 3px;
+    width: 4px; height: 4px;
+    background: var(--tile-color, rgba(130,253,71,0.3));
+  }
+  .tile-name {
+    font-family: var(--grotesk); font-size: 20px; font-weight: 700;
+    color: var(--off-white); margin-bottom: 6px; line-height: 1.2;
+  }
+  .tile-type {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+    color: var(--tile-color, var(--green)); opacity: 0.6;
+    text-transform: uppercase; margin-bottom: auto;
+  }
+  .tile-cupo {
+    display: flex; align-items: baseline; gap: 6px; margin-top: 12px;
+  }
+  .tile-cupo-num {
+    font-family: var(--mono); font-size: 48px; font-weight: 700;
+    color: var(--tile-color, var(--green));
+    font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  .tile-cupo-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+    color: rgba(239,255,254,0.3); text-transform: uppercase;
+  }
+  .tile-cupo-num.zero { color: var(--red); opacity: 0.4; }
+  .tile-bar {
+    height: 3px; margin-top: 8px;
+    background: rgba(255,255,255,0.05);
+    position: relative; overflow: hidden;
+  }
+  .tile-bar-fill {
+    position: absolute; top: 0; left: 0; height: 100%;
+    background: var(--tile-color, var(--green));
+    transition: width 0.6s ease;
+  }
+
+  /* Feed */
+  .feed-section {
+    margin-top: 16px;
+    border-top: 1px solid rgba(130,253,71,0.08);
+    padding-top: 12px;
+    display: flex; align-items: center; gap: 16px;
+    overflow: hidden;
+  }
+  .feed-label {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+    color: var(--green); opacity: 0.3; text-transform: uppercase;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .feed-items {
+    display: flex; gap: 24px; overflow: hidden; flex: 1;
+  }
+  .feed-item {
+    font-family: var(--mono); font-size: 11px; color: rgba(239,255,254,0.4);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .feed-item .fi-name { color: var(--off-white); opacity: 0.6; }
+  .feed-item .fi-prize { color: var(--green); }
+</style>
+</head>
+<body>
+<div class="board">
+  <div class="board-header">
+    <div>
+      <div class="board-title"><span class="hl">SALENTINO</span> × RITVALES 2026</div>
+      <div class="board-meta">CUPOS DISPONIBLES HOY</div>
+    </div>
+    <div>
+      <div class="board-clock" id="clock">--:--:--</div>
+      <div class="board-status" id="status">CONECTANDO...</div>
+    </div>
+  </div>
+  <div class="prize-grid" id="grid"></div>
+  <div class="feed-section">
+    <div class="feed-label">RECIENTES</div>
+    <div class="feed-items" id="feed"></div>
+  </div>
+</div>
+
+<script>
+var SHEET_URL = 'https://script.google.com/macros/s/AKfycbx7fLPf444KH3lODKpv9mE0iBX1Zh0NXyq29_0J31KpJTizhC4k4H2fv2V1hxkQpOHpVQ/exec';
+
+var PRIZES = [
+  { id: 'cafe',    name: 'Aeropress',          color: '#EFFFFE', cupo: 30, type: 'MOSTRADOR' },
+  { id: 'fria',    name: 'Bebida fr\u00eda',   color: '#82FD47', cupo: 15, type: 'MOSTRADOR' },
+  { id: 'collar',  name: 'Collar Ritvales',    color: '#7D3BED', cupo: 10, type: 'MOSTRADOR' },
+  { id: 'desc20',  name: '20% Boleter\u00eda', color: '#224FD1', cupo: 8,  type: 'TUBOLETA' },
+  { id: 'entrada', name: 'Entrada general',    color: '#FF4B43', cupo: 3,  type: 'TUBOLETA' },
+];
+
+// Build grid
+var grid = document.getElementById('grid');
+PRIZES.forEach(function(p) {
+  var tile = document.createElement('div');
+  tile.className = 'prize-tile';
+  tile.id = 'tile-' + p.id;
+  tile.setAttribute('data-tab', p.type);
+  tile.style.setProperty('--tile-color', p.color);
+  tile.innerHTML =
+    '<div class="tile-name">' + p.name + '</div>' +
+    '<div class="tile-type">' + p.type + '</div>' +
+    '<div class="tile-cupo">' +
+      '<span class="tile-cupo-num" id="num-' + p.id + '">--</span>' +
+      '<span class="tile-cupo-label">/ ' + p.cupo + '</span>' +
+    '</div>' +
+    '<div class="tile-bar"><div class="tile-bar-fill" id="bar-' + p.id + '"></div></div>';
+  grid.appendChild(tile);
+});
+
+// Clock
+function tickClock() {
+  var d = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+  document.getElementById('clock').textContent =
+    pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+// Fetch board data
+function fetchBoard() {
+  var statusEl = document.getElementById('status');
+  fetch(SHEET_URL + '?action=board')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.status !== 'ok') throw new Error('bad');
+      statusEl.textContent = 'SERVIDOR OK — ' + (data.total_played || 0) + ' jugadas hoy';
+      statusEl.className = 'board-status ok';
+
+      var remaining = data.remaining || {};
+      PRIZES.forEach(function(p) {
+        var left = typeof remaining[p.id] === 'number' ? remaining[p.id] : p.cupo;
+        var numEl = document.getElementById('num-' + p.id);
+        numEl.textContent = left;
+        numEl.className = left === 0 ? 'tile-cupo-num zero' : 'tile-cupo-num';
+        var pct = Math.min(100, (left / p.cupo) * 100);
+        document.getElementById('bar-' + p.id).style.width = pct + '%';
+      });
+
+      // Feed
+      var feed = document.getElementById('feed');
+      feed.innerHTML = '';
+      var last = data.last || [];
+      last.forEach(function(entry) {
+        var item = document.createElement('span');
+        item.className = 'feed-item';
+        var firstName = (entry.nombre || '').split(' ')[0] || '???';
+        item.innerHTML = '<span class="fi-name">' + firstName + '</span> \u2192 <span class="fi-prize">' + (entry.premio || '').toUpperCase() + '</span>';
+        feed.appendChild(item);
+      });
+    })
+    .catch(function() {
+      statusEl.textContent = 'SIN CONEXI\u00d3N';
+      statusEl.className = 'board-status err';
+    });
+}
+
+fetchBoard();
+setInterval(fetchBoard, 15000);
+</script>
+</body>
+</html>
