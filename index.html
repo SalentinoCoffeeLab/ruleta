@@ -147,8 +147,8 @@
   .footer .live-clock { font-size: 9px; letter-spacing: 2px; color: var(--green); opacity: 0.3; margin-top: 2px; font-variant-numeric: tabular-nums; }
 
   .result-screen {
-    flex-direction: column; align-items: center; justify-content: center;
-    padding: 40px 20px; text-align: center; background: var(--black); z-index: 30;
+    flex-direction: column; align-items: center; justify-content: flex-start;
+    padding: 24px 16px 16px; text-align: center; background: var(--black); z-index: 30;
     overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
 
@@ -158,7 +158,7 @@
     background: linear-gradient(165deg, rgba(130,253,71,0.05) 0%, rgba(34,79,209,0.03) 50%, rgba(125,59,237,0.04) 100%);
     border: 1.5px solid rgba(130,253,71,0.12);
     border-radius: 20px;
-    padding: 32px 24px 28px;
+    padding: 24px 20px 20px;
     max-width: 340px; width: 100%;
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 60px rgba(130,253,71,0.04), inset 0 1px 0 rgba(255,255,255,0.04);
@@ -171,17 +171,15 @@
   }
   .prize-card.glow::before { opacity: 1; }
 
-  .result-screen .r-icon { font-size: 72px; margin-bottom: 12px; opacity: 0; transform: scale(0) rotate(-20deg); filter: drop-shadow(0 4px 20px rgba(0,0,0,0.4)); }
-  .result-screen .r-phrase { font-size: 9px; letter-spacing: 5px; text-transform: uppercase; color: var(--green); margin-bottom: 8px; opacity: 0; }
   .result-screen .r-label { font-size: 10px; letter-spacing: 6px; text-transform: uppercase; color: var(--steel); margin-bottom: 6px; opacity: 0; }
   .result-screen .r-name {
-    font-size: clamp(24px, 7vw, 36px); font-weight: 700; color: var(--green);
+    font-size: clamp(20px, 6vw, 30px); font-weight: 700; color: var(--green);
     text-shadow: 0 0 40px rgba(130,253,71,0.2), 0 0 80px rgba(130,253,71,0.08);
-    line-height: 1.1; margin-bottom: 14px; max-width: 300px; opacity: 0;
+    line-height: 1.1; margin-bottom: 10px; max-width: 300px; opacity: 0;
   }
   .result-screen .r-desc {
-    font-size: 12px; color: var(--steel); line-height: 1.7; max-width: 280px;
-    margin: 0 auto 20px; opacity: 0;
+    font-size: 12px; color: #EFFFFE; line-height: 1.7; max-width: 280px;
+    margin: 0 auto 16px; opacity: 0;
   }
 
   .result-screen .r-divider {
@@ -190,15 +188,18 @@
     opacity: 0;
   }
 
-  .result-screen .r-staff {
-    font-size: 9px; letter-spacing: 3px; color: var(--orange);
-    padding: 10px 20px; border-radius: 8px; text-transform: uppercase;
-    background: rgba(236,110,37,0.06); border: 1px solid rgba(236,110,37,0.2);
-    opacity: 0;
-  }
   .result-screen .r-player {
-    font-size: 8px; color: var(--steel); opacity: 0; margin-top: 20px; letter-spacing: 3px;
+    display: none;
   }
+
+  .prize-clock { font-family: var(--mono); font-size: 22px; font-weight: 700; color: #EFFFFE; letter-spacing: 1px; text-align: center; margin: 0 0 8px; font-variant-numeric: tabular-nums; }
+  .prize-meta { font-size: 10px; color: #EFFFFE; opacity: 0.7; letter-spacing: 0.5px; text-align: center; margin-bottom: 8px; line-height: 1.4; }
+  .prize-status { font-size: 11px; letter-spacing: 1px; text-align: center; margin-bottom: 8px; font-weight: 700; }
+  .prize-status.pending { color: var(--green); }
+  .prize-status.redeemed { color: var(--steel); opacity: 0.5; }
+  .prize-status.expired { color: var(--red); text-decoration: line-through; }
+  .prize-redeem-link { font-size: 11px; color: var(--steel); opacity: 0.5; text-decoration: underline; text-align: center; display: block; cursor: pointer; }
+  .prize-redeem-link:hover { opacity: 0.8; }
 
   .btn-play-again {
     font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 3px;
@@ -262,15 +263,12 @@
 
   .played-screen { flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; text-align: center; background: var(--black); z-index: 30; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .played-card { background: linear-gradient(160deg, rgba(130,253,71,0.06) 0%, rgba(125,59,237,0.04) 100%); border: 1.5px solid rgba(130,253,71,0.15); border-radius: 16px; padding: 28px 24px; max-width: 320px; width: 100%; margin-bottom: 20px; }
-  .played-card .played-icon { font-size: 56px; margin-bottom: 12px; }
   .played-card .played-label { font-size: 9px; letter-spacing: 4px; color: var(--steel); opacity: 0.5; margin-bottom: 6px; text-transform: uppercase; }
   .played-card .played-prize { font-size: clamp(20px, 6vw, 28px); font-weight: 700; color: var(--green); text-shadow: 0 0 30px rgba(130,253,71,0.2); line-height: 1.2; margin-bottom: 12px; }
-  .played-card .played-desc { font-size: 11px; color: var(--steel); line-height: 1.6; opacity: 0.7; margin-bottom: 14px; }
+  .played-card .played-desc { font-size: 11px; color: #EFFFFE; line-height: 1.6; margin-bottom: 14px; }
   .played-card .played-player { font-size: 9px; color: var(--steel); opacity: 0.3; letter-spacing: 2px; margin-top: 8px; }
   .played-card .played-divider { width: 40px; height: 1px; background: rgba(130,253,71,0.15); margin: 14px auto; }
-  .played-staff { font-size: 10px; letter-spacing: 3px; color: var(--orange); border: 1px solid rgba(236,110,37,0.3); padding: 10px 20px; border-radius: 8px; text-transform: uppercase; margin-bottom: 20px; max-width: 320px; }
   .played-status { font-size: 10px; letter-spacing: 3px; color: var(--green); opacity: 0.4; margin-bottom: 6px; }
-  .played-phrase { font-size: 9px; letter-spacing: 4px; color: var(--green); opacity: 0.25; }
 
   canvas#bgCanvas { position: fixed; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
   canvas#confettiCanvas { position: fixed; inset: 0; z-index: 350; pointer-events: none; }
@@ -311,7 +309,7 @@
   .terms-overlay .btn-close-terms { display: block; margin: 24px auto 0; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 14px 32px; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--green); background: rgba(130,253,71,0.04); color: var(--green); }
 
   .change-code-link { font-size: 12px; color: var(--green); text-decoration: underline; margin-top: 4px; display: block; text-align: center; }
-  .footer-phrase { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--cream); opacity: 0.5; text-align: center; padding: 16px 0; margin-top: auto; }
+  .footer-phrase { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; color: #EFFFFE; opacity: 0.7; text-align: center; padding: 12px 0; margin-top: auto; }
   .social-links { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 16px 0; }
   .social-link { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--green); text-decoration: none; min-height: 44px; display: flex; align-items: center; padding: 0 8px; }
   .social-dot { color: var(--cream); opacity: 0.3; }
@@ -389,7 +387,6 @@
 <!-- SCREEN 3: RESULT -->
 <div id="resultScreen" class="screen result-screen">
   <div class="prize-card" id="prizeCard">
-    <div class="r-icon" id="rIcon"></div>
     <div class="r-label" id="rLabel"></div>
     <div class="r-name" id="rName"></div>
     <div class="r-divider" id="rDivider"></div>
@@ -414,17 +411,20 @@
       <button class="btn-tuboleta" id="btnTuboleta" onclick="submitTuboleta()">ENVIAR DATOS A RITVALES</button>
       <div class="tuboleta-confirm" id="tuboConfirm">Datos enviados. Ritvales te contactará.</div>
     </div>
-    <div id="prizeClock" style="font-size:11px;letter-spacing:1px;color:var(--green);margin-top:12px;font-variant-numeric:tabular-nums;"></div>
+    <div class="prize-clock" id="prizeClock"></div>
+    <div class="prize-meta" id="prizeMeta"></div>
+    <div class="prize-status" id="prizeStatus"></div>
+    <a href="#" class="prize-redeem-link" id="prizeRedeemLink" style="display:none" onclick="event.preventDefault();redeemCarrito()">Uso del carrito &rarr;</a>
   </div>
   <div class="r-player" id="rPlayer"></div>
   <div class="social-links">
     <a href="" class="social-link social-ig" target="_blank">
-      <span class="social-at">@</span><span class="social-handle"></span>
+      Instagram <span class="social-at">@</span><span class="social-handle"></span>
     </a>
     <span class="social-dot">&middot;</span>
     <a href="" class="social-link social-web" target="_blank"></a>
   </div>
-  <button class="btn-play-again" id="btnPlayAgain" onclick="playAgain()">JUGAR CON OTRO CÓDIGO</button>
+  <button class="btn-play-again" id="btnPlayAgain" onclick="playAgain()">¿OTRO CÓDIGO? GIRA DE NUEVO</button>
   <div class="footer-phrase">LENTO DE ORIGEN // RÁPIDO DE TOMAR</div>
 </div>
 
@@ -432,7 +432,6 @@
 <div id="playedScreen" class="screen played-screen">
   <div class="played-status">YA PARTICIPASTE</div>
   <div class="played-card">
-    <div class="played-icon" id="playedIcon"></div>
     <div class="played-label">TU PREMIO</div>
     <div class="played-prize" id="playedPrize"></div>
     <div class="played-desc" id="playedDesc"></div>
@@ -443,12 +442,12 @@
   </div>
   <div class="social-links">
     <a href="" class="social-link social-ig" target="_blank">
-      <span class="social-at">@</span><span class="social-handle"></span>
+      Instagram <span class="social-at">@</span><span class="social-handle"></span>
     </a>
     <span class="social-dot">&middot;</span>
     <a href="" class="social-link social-web" target="_blank"></a>
   </div>
-  <button class="btn-play-again" onclick="playAgain()">JUGAR CON OTRO CÓDIGO</button>
+  <button class="btn-play-again" onclick="playAgain()">¿OTRO CÓDIGO? GIRA DE NUEVO</button>
   <div class="footer-phrase">LENTO DE ORIGEN // RÁPIDO DE TOMAR</div>
 </div>
 
@@ -568,7 +567,7 @@ function fetchServerStatus() {
 // PRIZES (6 segments — server decides which one)
 // ═══════════════════════════════════════════════════════════
 var PRIZES = [
-  { id: 'cafe',        label: 'AEROPRESS',          title: 'Bebida caliente',  color: '#EC6E25', textColor: '#EFFFFE', desc: 'Elige cualquier bebida caliente en el carrito Salentino. Pide tu Aeropress, pour over o el método que prefieras.', type: 'carrito' },
+  { id: 'cafe',        label: 'AEROPRESS',          title: 'Aeropress',  color: '#EC6E25', textColor: '#EFFFFE', desc: 'Muestra esta pantalla en el carrito Salentino y reclama tu Aeropress. Válido solo hoy, hasta el cierre del carrito.', type: 'carrito' },
   { id: 'fria',        label: 'BEBIDA FRÍA',        title: 'Bebida fría',      color: '#82FD47', textColor: '#020102', desc: 'Elige entre ' + OPCIONES_FRIAS + ' en el carrito Salentino.', type: 'carrito' },
   { id: 'collar',      label: 'COLLAR\nRITVALES',   title: 'Collar Ritvales',  color: '#7D3BED', textColor: '#EFFFFE', desc: 'Collar oficial Ritvales 2026. Reclámalo en el carrito Salentino.', type: 'carrito' },
   { id: 'desc20',      label: '20 % DCTO\nRITVALES', title: '20 % en boletería', color: '#224FD1', textColor: '#EFFFFE', desc: '20 % de descuento en boletería Ritvales 2026. Completa tus datos y Ritvales te enviará el código.', type: 'tuboleta' },
@@ -659,39 +658,6 @@ function handleQrParam() {
 var qrCode = handleQrParam();
 
 // ═══════════════════════════════════════════════════════════
-// PRIZE CLOCK (carrito prizes — 24h countdown)
-// ═══════════════════════════════════════════════════════════
-var prizeClockInterval = null;
-
-function startPrizeClock(ganado_en) {
-  var el = document.getElementById('prizeClock');
-  if (!el) return;
-
-  function update() {
-    var now = colNow();
-    // Expiry is end of ganado_en day in Colombia time
-    var parts = ganado_en.split('-');
-    var expiry = new Date(Date.UTC(+parts[0], +parts[1]-1, +parts[2], 5, 0, 0)); // midnight COL = 05:00 UTC next day
-    expiry.setDate(expiry.getDate() + 1); // next day 00:00 COL
-
-    var diff = expiry.getTime() - now.getTime();
-    if (diff <= 0) {
-      el.textContent = 'Expirado';
-      el.style.color = '#FF4B43';
-      clearInterval(prizeClockInterval);
-      return;
-    }
-    var h = Math.floor(diff / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    var s = Math.floor((diff % 60000) / 1000);
-    el.textContent = 'Válido hoy — expira en ' +
-      String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-  }
-  update();
-  prizeClockInterval = setInterval(update, 1000);
-}
-
-// ═══════════════════════════════════════════════════════════
 // INIT — allow multiple codes, no daily block
 // ═══════════════════════════════════════════════════════════
 
@@ -699,13 +665,11 @@ function showAlreadyPlayed(data) {
   hideAllScreens();
   var prize = PRIZES.find(function(p) { return p.id === data.prize; });
   if (prize) {
-    document.getElementById('playedIcon').textContent = prize.title;
-    document.getElementById('playedPrize').textContent = prize.label.replace('\n', ' ');
+    document.getElementById('playedPrize').textContent = prize.title;
     document.getElementById('playedDesc').textContent = prize.desc;
     document.getElementById('playedDeliverWrap').style.display = 'none';
     document.getElementById('playedTuboletaMsg').style.display = 'none';
   } else {
-    document.getElementById('playedIcon').textContent = '✓';
     document.getElementById('playedPrize').textContent = data.prize;
     document.getElementById('playedDesc').textContent = '';
     document.getElementById('playedDeliverWrap').style.display = 'none';
@@ -868,8 +832,9 @@ function submitAndSpin() {
         return;
       }
       currentResultCode = code;
+      currentGanadoEn = data.ganado_en || TODAY;
       saveLocalPlayed({ date: TODAY, prize: prize.id, name: name, code: code, type: prize.type });
-      showWheelAndSpin(name, prize);
+      showWheelAndSpin(name, prize, currentGanadoEn);
     } else {
       // Handle server error codes
       var err = data.error || 'SERVER_ERROR';
@@ -910,7 +875,7 @@ function hideAllScreens() {
   for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active', 'winner');
 }
 
-function showWheelAndSpin(name, prize) {
+function showWheelAndSpin(name, prize, ganadoEn) {
   hideAllScreens();
   document.getElementById('wheelScreen').classList.add('active');
   document.getElementById('playerName').textContent = name.toUpperCase();
@@ -950,7 +915,7 @@ function spin(prize, playerName) {
       setTimeout(function() { pointer.classList.remove('tick'); }, 50);
     }
     if (t < 1) { requestAnimationFrame(animate); }
-    else { isSpinning = false; hub.classList.remove('spinning'); showResult(prize, playerName); }
+    else { isSpinning = false; hub.classList.remove('spinning'); showResult(prize, playerName, ganadoEn); }
   }
   requestAnimationFrame(animate);
 }
@@ -961,22 +926,103 @@ function spin(prize, playerName) {
 var currentResultPrize = null;
 var currentResultPlayer = null;
 var currentResultCode = null;
+var currentGanadoEn = null;
+var prizeClockInterval = null;
 
-function showResult(prize, playerName) {
+function colClockStr() {
+  return new Intl.DateTimeFormat('es-CO', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false, timeZone: 'America/Bogota' }).format(new Date());
+}
+function colDateParts(dateStr) {
+  // dateStr = "2026-10-24" → { dayName: 'sáb 24', time: 'HH:MM' }
+  var parts = dateStr.split('-');
+  var d = new Date(Date.UTC(+parts[0], +parts[1]-1, +parts[2], 12, 0, 0));
+  var dayNames = ['dom','lun','mar','mié','jue','vie','sáb'];
+  return { dayName: dayNames[d.getUTCDay()] + ' ' + (+parts[2]) };
+}
+
+function updatePrizeCard(prize, playerName, code, ganadoEn, canjeadoEn) {
+  var clockEl = document.getElementById('prizeClock');
+  var metaEl = document.getElementById('prizeMeta');
+  var statusEl = document.getElementById('prizeStatus');
+  var redeemEl = document.getElementById('prizeRedeemLink');
+
+  // Live clock
+  if (prizeClockInterval) { clearInterval(prizeClockInterval); prizeClockInterval = null; }
+  function tickClock() { clockEl.textContent = colClockStr(); }
+  tickClock();
+  prizeClockInterval = setInterval(tickClock, 1000);
+
+  // Meta line: name · code · Ganado sáb 24 HH:MM
+  var ganadoParts = colDateParts(ganadoEn || TODAY);
+  var ganadoTime = new Intl.DateTimeFormat('es-CO', { hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'America/Bogota' }).format(new Date());
+  metaEl.textContent = (playerName || '') + ' · ' + (code || '') + ' · Ganado ' + ganadoParts.dayName + ' ' + ganadoTime;
+
+  // Status
+  statusEl.className = 'prize-status';
+  redeemEl.style.display = 'none';
+
+  if (canjeadoEn) {
+    statusEl.classList.add('redeemed');
+    statusEl.textContent = 'Canjeado a las ' + canjeadoEn.split(' ').pop().substring(0,5) + '.';
+  } else if (prize.type === 'carrito') {
+    // Check if expired (ganado_en != today)
+    if (ganadoEn && ganadoEn !== TODAY) {
+      statusEl.classList.add('expired');
+      statusEl.textContent = 'Vencido. Este premio era válido el ' + ganadoParts.dayName + '.';
+    } else {
+      statusEl.classList.add('pending');
+      statusEl.textContent = 'Pendiente por reclamar';
+      redeemEl.style.display = '';
+    }
+  } else if (prize.type === 'consolacion') {
+    statusEl.classList.add('pending');
+    statusEl.textContent = 'Pendiente por reclamar';
+  } else {
+    // tuboleta — no redeem link
+    statusEl.classList.add('pending');
+    statusEl.textContent = 'Pendiente';
+  }
+}
+
+function redeemCarrito() {
+  if (!currentResultCode || !currentResultPrize) return;
+  var pin = prompt('PIN del carrito:');
+  if (!pin) return;
+  serverPost({
+    action: 'redeem',
+    code: currentResultCode,
+    pin: pin
+  }).then(function(data) {
+    if (data.status === 'ok') {
+      var statusEl = document.getElementById('prizeStatus');
+      statusEl.className = 'prize-status redeemed';
+      statusEl.textContent = 'Canjeado a las ' + colClockStr().substring(0,5) + '.';
+      document.getElementById('prizeRedeemLink').style.display = 'none';
+    } else if (data.error === 'EXPIRED') {
+      alert('Este premio venció. Era válido solo el día que lo ganaste.');
+    } else if (data.error === 'ALREADY_REDEEMED') {
+      alert('Este premio ya fue canjeado.');
+    } else {
+      alert('Error: ' + (data.error || 'desconocido'));
+    }
+  }).catch(function() {
+    alert('Sin conexión. Intenta de nuevo.');
+  });
+}
+
+function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   currentResultPrize = prize;
   currentResultPlayer = playerName;
+  currentGanadoEn = ganadoEn || TODAY;
   var isWinner = (prize.type === 'tuboleta');
   hideAllScreens();
   var screen = document.getElementById('resultScreen');
   screen.classList.add('active');
   if (isWinner) screen.classList.add('winner');
 
-  document.getElementById('rIcon').textContent = prize.title;
-  // rPhrase removed
   document.getElementById('rLabel').textContent = 'GANASTE';
-  document.getElementById('rName').textContent = prize.label.replace('\n', ' ');
+  document.getElementById('rName').textContent = prize.title;
   document.getElementById('rDesc').textContent = prize.desc;
-  document.getElementById('rPlayer').textContent = playerName ? playerName.toUpperCase() : '';
 
   var deliverWrap = document.getElementById('rDeliverWrap');
   var tuboletaWrap = document.getElementById('rTuboletaWrap');
@@ -994,23 +1040,15 @@ function showResult(prize, playerName) {
     tuboletaWrap.style.display = 'none';
   }
 
-  // Start prize clock for carrito prizes
-  if (prizeClockInterval) { clearInterval(prizeClockInterval); prizeClockInterval = null; }
-  var clockEl = document.getElementById('prizeClock');
-  if (prize.type === 'carrito') {
-    clockEl.style.display = '';
-    startPrizeClock(TODAY);
-  } else {
-    clockEl.style.display = 'none';
-  }
+  updatePrizeCard(prize, playerName, currentResultCode, currentGanadoEn, canjeadoEn);
 
   // GSAP Timeline
   var card = document.getElementById('prizeCard');
   if (typeof gsap === 'undefined') {
     card.style.opacity = '1'; card.style.transform = 'none';
-    ['rIcon','rLabel','rName','rDesc','rDivider','rPlayer','btnPlayAgain'].forEach(function(id) {
+    ['rLabel','rName','rDesc','rDivider','btnPlayAgain'].forEach(function(id) {
       var el = document.getElementById(id);
-      if (el) { el.style.opacity = id === 'rPlayer' ? '0.3' : '1'; el.style.transform = 'none'; }
+      if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
     });
     if (isWinner) launchConfetti();
     return;
@@ -1018,22 +1056,19 @@ function showResult(prize, playerName) {
   var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
   gsap.set(card, { opacity: 0, y: 30, scale: 0.95 });
-  gsap.set('#rIcon', { opacity: 0, scale: 0, rotation: -20 });
-  gsap.set(['#rLabel', '#rName', '#rDesc', '#rDivider', '#rPlayer', '#btnPlayAgain'], { opacity: 0, y: 15 });
+  gsap.set(['#rLabel', '#rName', '#rDesc', '#rDivider', '#btnPlayAgain'], { opacity: 0, y: 15 });
 
   tl.to(card, { opacity: 1, y: 0, scale: 1, duration: 0.6 })
-    .to('#rIcon', { opacity: 1, scale: 1, rotation: 0, duration: 0.5, ease: 'back.out(2.5)' }, '-=0.2')
     .to('#rLabel', { opacity: 0.6, y: 0, duration: 0.3 }, '-=0.1')
     .to('#rName', { opacity: 1, y: 0, duration: 0.4 }, '-=0.1')
     .to('#rDivider', { opacity: 1, y: 0, duration: 0.3 }, '-=0.15')
-    .to('#rDesc', { opacity: 0.8, y: 0, duration: 0.35 }, '-=0.1');
+    .to('#rDesc', { opacity: 1, y: 0, duration: 0.35 }, '-=0.1');
 
   if (prize.type === 'tuboleta') {
     tl.to('#rTuboletaWrap', { opacity: 1, y: 0, duration: 0.4 }, '-=0.05');
     gsap.set('#rTuboletaWrap', { opacity: 0, y: 15 });
   }
 
-  tl.to('#rPlayer', { opacity: 0.3, y: 0, duration: 0.3 }, '-=0.1');
   tl.to('#btnPlayAgain', { opacity: 1, y: 0, duration: 0.4 }, '+=0.3');
   tl.call(function() { card.classList.add('glow'); }, null, '-=0.6');
 
