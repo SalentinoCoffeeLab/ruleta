@@ -616,22 +616,43 @@
   .admin-pin .btn-pin-cancel { font-family: var(--mono); font-size: 10px; color: var(--steel); background: none; border: 1px solid rgba(174,225,246,0.15); padding: 10px 24px; cursor: pointer; letter-spacing: 2px; margin-top: 8px; }
 
   /* ─── TERMS OVERLAY ─── */
-  .terms-overlay { display: none; position: fixed; inset: 0; z-index: 600; background: rgba(2,1,2,0.98); padding: calc(24px + var(--sat)) 20px calc(24px + var(--sab)); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .terms-overlay {
+    display: none; position: fixed; inset: 0; z-index: 600;
+    background: rgba(2,1,2,0.98);
+    padding: calc(24px + var(--sat)) 16px calc(24px + var(--sab));
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
   .terms-overlay.active { display: block; }
-  .terms-overlay h2 { font-family: var(--grotesk); color: var(--off-white); font-size: 16px; text-align: center; margin-bottom: 4px; }
-  .terms-overlay h3 { font-family: var(--mono); color: var(--green); font-size: 11px; letter-spacing: 2px; margin-bottom: 10px; margin-top: 18px; text-transform: uppercase; }
-  .terms-overlay .terms-body, .terms-overlay .terms-content { font-size: 11px; color: var(--steel); line-height: 1.8; max-width: 480px; margin: 0 auto; }
-  .terms-overlay .terms-body p, .terms-overlay .terms-content p { margin-bottom: 14px; }
-  .terms-overlay .terms-body strong, .terms-overlay .terms-content strong { color: var(--off-white); }
-  .terms-overlay .terms-body ul, .terms-overlay .terms-content ul { padding-left: 20px; margin-bottom: 14px; }
-  .terms-overlay .terms-body li, .terms-overlay .terms-content li { margin-bottom: 6px; }
-  .terms-overlay .terms-body a, .terms-overlay .terms-content a { color: var(--green); }
-  .terms-overlay .btn-close-terms {
-    display: block; margin: 24px auto 0;
+  .terms-box {
+    position: relative; max-width: 480px; margin: 0 auto;
+    border: 1px solid rgba(130,253,71,0.15);
+    padding: 28px 16px 16px;
+  }
+  .terms-box::after {
+    content: 'TÉRMINOS'; position: absolute; top: -1px; left: 12px;
+    background: var(--green); color: var(--black);
+    font-family: var(--mono); font-size: 8px; font-weight: 700;
+    letter-spacing: 2px; padding: 2px 8px;
+  }
+  .terms-box::before {
+    content: ''; position: absolute; top: 3px; right: 3px;
+    width: 5px; height: 5px; background: rgba(130,253,71,0.3);
+  }
+  .terms-box h2 { font-family: var(--grotesk); color: var(--off-white); font-size: 16px; text-align: center; margin-bottom: 4px; }
+  .terms-box h3 { font-family: var(--mono); color: var(--green); font-size: 11px; letter-spacing: 2px; margin-bottom: 10px; margin-top: 18px; text-transform: uppercase; }
+  .terms-box p { font-size: 11px; color: var(--steel); line-height: 1.8; margin-bottom: 14px; }
+  .terms-box strong { color: var(--off-white); }
+  .terms-box ul { padding-left: 20px; margin-bottom: 14px; }
+  .terms-box li { font-size: 11px; color: var(--steel); line-height: 1.8; margin-bottom: 6px; }
+  .terms-box a { color: var(--green); }
+  .btn-close-terms {
+    display: block; margin: 20px auto 0; width: 100%; max-width: 480px;
     font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 3px;
     text-transform: uppercase; padding: 14px 32px; cursor: pointer;
     border: 1px solid var(--green); background: transparent; color: var(--green);
+    transition: transform 0.1s;
   }
+  .btn-close-terms:active { transform: scale(0.97); }
 
   /* ─── MISC ─── */
   .change-code-link { font-family: var(--mono); font-size: 12px; color: var(--green); text-decoration: underline; margin-top: 4px; display: block; text-align: center; }
@@ -802,7 +823,7 @@
 
 <!-- TERMS & CONDITIONS -->
 <div id="termsOverlay" class="terms-overlay">
-  <div class="terms-content">
+  <div class="terms-box">
     <h2>Términos y condiciones</h2>
     <p><strong>Ruleta Salentino × Ritvales 2026</strong></p>
 
