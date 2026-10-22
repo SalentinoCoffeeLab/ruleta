@@ -1928,6 +1928,180 @@ function closeTerms() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// STORY IMAGE GENERATION (1080×1920 — CCTV aesthetic)
+// ═══════════════════════════════════════════════════════════
+function generateStoryImage() {
+  if (!currentResultPrize) return;
+  var W = 1080, H = 1920;
+  var c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  var ctx = c.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#020102';
+  ctx.fillRect(0, 0, W, H);
+
+  // Scanlines
+  ctx.fillStyle = 'rgba(130,253,71,0.015)';
+  for (var y = 0; y < H; y += 4) {
+    ctx.fillRect(0, y, W, 1);
+  }
+
+  // Grid pattern (CCTV)
+  ctx.strokeStyle = 'rgba(130,253,71,0.03)';
+  ctx.lineWidth = 1;
+  for (var gx = 0; gx < W; gx += 60) {
+    ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
+  }
+  for (var gy = 0; gy < H; gy += 60) {
+    ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+  }
+
+  // Corner brackets (CCTV frame)
+  var bLen = 80, bW = 3, margin = 40;
+  ctx.strokeStyle = 'rgba(130,253,71,0.25)';
+  ctx.lineWidth = bW;
+  // Top-left
+  ctx.beginPath(); ctx.moveTo(margin, margin + bLen); ctx.lineTo(margin, margin); ctx.lineTo(margin + bLen, margin); ctx.stroke();
+  // Top-right
+  ctx.beginPath(); ctx.moveTo(W - margin - bLen, margin); ctx.lineTo(W - margin, margin); ctx.lineTo(W - margin, margin + bLen); ctx.stroke();
+  // Bottom-left
+  ctx.beginPath(); ctx.moveTo(margin, H - margin - bLen); ctx.lineTo(margin, H - margin); ctx.lineTo(margin + bLen, H - margin); ctx.stroke();
+  // Bottom-right
+  ctx.beginPath(); ctx.moveTo(W - margin - bLen, H - margin); ctx.lineTo(W - margin, H - margin); ctx.lineTo(W - margin, H - margin - bLen); ctx.stroke();
+
+  // REC indicator top-left
+  ctx.fillStyle = '#FF4B43';
+  ctx.beginPath(); ctx.arc(margin + 30, margin + 50, 8, 0, 2 * Math.PI); ctx.fill();
+  ctx.font = '700 24px "Space Mono", monospace';
+  ctx.fillStyle = '#FF4B43';
+  ctx.fillText('REC', margin + 50, margin + 58);
+
+  // Timestamp top-right
+  var now = colNow();
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+  var ts = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+  ctx.font = '700 22px "Space Mono", monospace';
+  ctx.fillStyle = 'rgba(130,253,71,0.4)';
+  ctx.textAlign = 'right';
+  ctx.fillText(ts, W - margin - 10, margin + 58);
+  ctx.textAlign = 'left';
+
+  // Center content
+  var cx = W / 2;
+
+  // Prize color accent line
+  ctx.fillStyle = currentResultPrize.color;
+  ctx.fillRect(cx - 120, 580, 240, 3);
+
+  // "GANASTE" label
+  ctx.font = '700 28px "Space Mono", monospace';
+  ctx.fillStyle = 'rgba(130,253,71,0.5)';
+  ctx.textAlign = 'center';
+  ctx.fillText('GANASTE', cx, 650);
+
+  // Prize name
+  ctx.font = '700 72px "Space Grotesk", sans-serif';
+  ctx.fillStyle = '#EFFFFE';
+  var prizeTitle = currentResultPrize.title.toUpperCase();
+  // Word wrap if needed
+  var words = prizeTitle.split(' ');
+  var lines = [];
+  var line = '';
+  for (var wi = 0; wi < words.length; wi++) {
+    var test = line ? line + ' ' + words[wi] : words[wi];
+    if (ctx.measureText(test).width > W - 160) {
+      lines.push(line);
+      line = words[wi];
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  var lineH = 85;
+  var startY = 750 - (lines.length - 1) * lineH / 2;
+  for (var li = 0; li < lines.length; li++) {
+    ctx.fillText(lines[li], cx, startY + li * lineH);
+  }
+
+  // Prize accent bar below name
+  var barY = startY + (lines.length - 1) * lineH + 40;
+  ctx.fillStyle = currentResultPrize.color;
+  ctx.fillRect(cx - 120, barY, 240, 3);
+
+  // Description
+  ctx.font = '400 28px "Space Grotesk", sans-serif';
+  ctx.fillStyle = 'rgba(239,255,254,0.6)';
+  var descLines = wrapText(ctx, currentResultPrize.desc, W - 200);
+  var descY = barY + 60;
+  for (var di = 0; di < descLines.length; di++) {
+    ctx.fillText(descLines[di], cx, descY + di * 38);
+  }
+
+  // Branding — bottom
+  ctx.font = '700 20px "Space Mono", monospace';
+  ctx.fillStyle = 'rgba(130,253,71,0.3)';
+  ctx.fillText('SALENTINO × RITVALES 2026', cx, H - margin - 100);
+
+  ctx.font = '400 18px "Space Mono", monospace';
+  ctx.fillStyle = 'rgba(239,255,254,0.25)';
+  ctx.fillText('@' + INSTAGRAM_HANDLE, cx, H - margin - 60);
+
+  ctx.textAlign = 'left';
+
+  return c;
+}
+
+function wrapText(ctx, text, maxW) {
+  var words = text.split(' ');
+  var lines = [];
+  var line = '';
+  for (var i = 0; i < words.length; i++) {
+    var test = line ? line + ' ' + words[i] : words[i];
+    if (ctx.measureText(test).width > maxW) {
+      lines.push(line);
+      line = words[i];
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function shareStory() {
+  var canvas = generateStoryImage();
+  if (!canvas) return;
+
+  canvas.toBlob(function(blob) {
+    if (!blob) return;
+
+    // Try native share (mobile)
+    if (navigator.share && navigator.canShare) {
+      var file = new File([blob], 'salentino-ritvales.png', { type: 'image/png' });
+      var shareData = { files: [file] };
+      if (navigator.canShare(shareData)) {
+        navigator.share(shareData).catch(function() {});
+        return;
+      }
+    }
+
+    // Fallback: download
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'salentino-ritvales.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+  }, 'image/png');
+}
+
+// Attach handler
+document.getElementById('btnShareStory').addEventListener('click', shareStory);
+
+// ═══════════════════════════════════════════════════════════
 // INPUT HANDLERS
 // ═══════════════════════════════════════════════════════════
 document.getElementById('inputPhone').addEventListener('input', function() {
