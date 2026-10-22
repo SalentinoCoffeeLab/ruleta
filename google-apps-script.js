@@ -1,12 +1,12 @@
 // ═══════════════════════════════════════════════════════════
 // GOOGLE APPS SCRIPT — Ruleta Salentino x Ritvales 2026
-// Fase 1: Server-side security + numero column
+// Fase 2: Endpoints completos (spin/status/redeem/claim/board/ping/event)
 // ═══════════════════════════════════════════════════════════
 //
 // SETUP:
 // 1. Google Sheet con TRES pestañas:
 //    - "log"     → Timestamp | Nombre | Email | WhatsApp | Codigo | Premio | Hora
-//    - "codigos" → numero | codigo | usado | premio | nombre | email | whatsapp | ganado_en | canjeado_en | cedula
+//    - "codigos" → numero | codigo | usado | premio | nombre | email | whatsapp | ganado_en | canjeado_en | cedula | datos_enviados
 //    - "Resumen" → Dashboard con fórmulas (solo lectura)
 // 2. Script Properties → agregar: ADMIN_PIN = 2610
 // 3. Ejecutar initCodes() una vez desde el editor de Apps Script
@@ -29,6 +29,10 @@ var PRIZE_CONFIG = [
   { id: 'entrada',     weight: 3,  daily_limit: CUPO_ENTRADA },
   { id: 'consolacion', weight: 0,  daily_limit: 9999 },
 ];
+
+// Expiry rules: mostrador (cafe/fria/collar) = same day, tuboleta (desc20/entrada) = 30 days, consolacion = 30 days
+var EXPIRY_SAME_DAY = ['cafe', 'fria', 'collar'];
+var EXPIRY_30_DAYS  = ['desc20', 'entrada', 'consolacion'];
 
 // ─── HELPERS ───
 function getSheet(name) {
@@ -53,6 +57,27 @@ function jsonResponse(obj) {
 
 function getAdminPin() {
   return PropertiesService.getScriptProperties().getProperty('ADMIN_PIN') || '2610';
+}
+
+function isUsed(flag) {
+  var f = String(flag).trim().toUpperCase();
+  return f === 'SI' || f === 'SÍ' || f === 'TRUE' || f === '1';
+}
+
+function isExpired(premio, ganadoEn) {
+  var ganDate = String(ganadoEn || '').slice(0, 10);
+  if (!ganDate) return false;
+  var today = colToday();
+  if (EXPIRY_SAME_DAY.indexOf(premio) >= 0) {
+    return ganDate !== today;
+  }
+  if (EXPIRY_30_DAYS.indexOf(premio) >= 0) {
+    var gan = new Date(ganDate + 'T12:00:00Z');
+    var now = new Date(today + 'T12:00:00Z');
+    var diffDays = Math.floor((now - gan) / 86400000);
+    return diffDays > 30;
+  }
+  return false;
 }
 
 // ─── CODE NORMALIZATION ───
@@ -96,6 +121,16 @@ function countPrizesToday(logSheet, today) {
   return counts;
 }
 
+function getRemainingQuotas(counts) {
+  var remaining = {};
+  for (var i = 0; i < PRIZE_CONFIG.length; i++) {
+    var p = PRIZE_CONFIG[i];
+    var used = counts[p.id] || 0;
+    remaining[p.id] = Math.max(0, p.daily_limit - used);
+  }
+  return remaining;
+}
+
 function pickPrize(logSheet, today) {
   var counts = countPrizesToday(logSheet, today);
 
@@ -120,7 +155,20 @@ function pickPrize(logSheet, today) {
   return available[available.length - 1].id;
 }
 
-// ─── POST HANDLER ───
+// ─── FIND CODE ROW ───
+// Returns { row: 1-indexed sheet row, index: 0-indexed data index } or null
+function findCodeRow(codigosData, code) {
+  for (var i = 1; i < codigosData.length; i++) {
+    if (normalizeStored(codigosData[i][1]) === code) {
+      return { row: i + 1, index: i };
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════
+// POST HANDLER
+// ═══════════════════════════════════════════════════════════
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
@@ -129,6 +177,7 @@ function doPost(e) {
     if (action === 'spin') return handleSpin(data);
     if (action === 'redeem') return handleRedeem(data);
     if (action === 'claim') return handleClaim(data);
+    if (action === 'event') return handleEvent(data);
 
     return jsonResponse({ status: 'error', error: 'UNKNOWN_ACTION' });
   } catch (error) {
@@ -136,7 +185,9 @@ function doPost(e) {
   }
 }
 
-// ─── ACTION: SPIN ───
+// ═══════════════════════════════════════════════════════════
+// ACTION: SPIN
+// ═══════════════════════════════════════════════════════════
 function handleSpin(data) {
   var code = normalizeCode(data.code || '');
   var name = (data.name || '').trim();
@@ -162,24 +213,17 @@ function handleSpin(data) {
     }
 
     // Find code in codigos sheet
-    // Columns: A=numero, B=codigo, C=usado, D=premio, E=nombre, F=email, G=whatsapp, H=ganado_en, I=canjeado_en, J=cedula
+    // Columns: A=numero(0), B=codigo(1), C=usado(2), D=premio(3), E=nombre(4), F=email(5), G=whatsapp(6), H=ganado_en(7), I=canjeado_en(8), J=cedula(9), K=datos_enviados(10)
     var codigosData = codigosSheet.getDataRange().getValues();
-    var codeRow = -1;
-    for (var i = 1; i < codigosData.length; i++) {
-      if (normalizeStored(codigosData[i][1]) === code) {
-        codeRow = i + 1; // 1-indexed for Sheet
-        break;
-      }
-    }
+    var found = findCodeRow(codigosData, code);
 
-    if (codeRow === -1) {
+    if (!found) {
       lock.releaseLock();
       return jsonResponse({ status: 'error', error: 'NOT_FOUND' });
     }
 
     // Check if already used
-    var usedFlag = String(codigosData[codeRow - 1][2]).trim().toUpperCase();
-    if (usedFlag === 'SI' || usedFlag === 'SÍ' || usedFlag === 'TRUE' || usedFlag === '1') {
+    if (isUsed(codigosData[found.index][2])) {
       lock.releaseLock();
       return jsonResponse({ status: 'error', error: 'USED' });
     }
@@ -188,21 +232,32 @@ function handleSpin(data) {
     var today = colToday();
     var prize = pickPrize(logSheet, today);
     var ts = colTimestamp();
+    var counts = countPrizesToday(logSheet, today);
+    // Count this spin into counts for remaining calc
+    counts[prize] = (counts[prize] || 0) + 1;
+    var remaining = getRemainingQuotas(counts);
+    var numero = String(codigosData[found.index][0]).trim();
 
     // Mark code as used in codigos sheet
-    codigosSheet.getRange(codeRow, 3).setValue('SI');      // C=usado
-    codigosSheet.getRange(codeRow, 4).setValue(prize);     // D=premio
-    codigosSheet.getRange(codeRow, 5).setValue(name);      // E=nombre
-    codigosSheet.getRange(codeRow, 6).setValue(email);     // F=email
-    codigosSheet.getRange(codeRow, 7).setValue(phone);     // G=whatsapp
-    codigosSheet.getRange(codeRow, 8).setValue(ts);        // H=ganado_en
+    codigosSheet.getRange(found.row, 3).setValue('SI');      // C=usado
+    codigosSheet.getRange(found.row, 4).setValue(prize);     // D=premio
+    codigosSheet.getRange(found.row, 5).setValue(name);      // E=nombre
+    codigosSheet.getRange(found.row, 6).setValue(email);     // F=email
+    codigosSheet.getRange(found.row, 7).setValue(phone);     // G=whatsapp
+    codigosSheet.getRange(found.row, 8).setValue(ts);        // H=ganado_en
 
     // Log the play
     logSheet.appendRow([ts, name, email, phone, code, prize, ts]);
 
     lock.releaseLock();
 
-    return jsonResponse({ status: 'ok', prize: prize, ganado_en: ts });
+    return jsonResponse({
+      status: 'ok',
+      prize: prize,
+      ganado_en: ts,
+      n: numero,
+      cupo: remaining[prize] !== undefined ? remaining[prize] : null
+    });
 
   } catch (error) {
     try { lock.releaseLock(); } catch(e2) {}
@@ -210,7 +265,9 @@ function handleSpin(data) {
   }
 }
 
-// ─── ACTION: REDEEM (carrito/physical prizes — staff marks as delivered) ───
+// ═══════════════════════════════════════════════════════════
+// ACTION: REDEEM (physical prizes — staff marks as delivered)
+// ═══════════════════════════════════════════════════════════
 function handleRedeem(data) {
   var code = normalizeCode(data.code || '');
   var pin = (data.pin || '').trim();
@@ -225,38 +282,31 @@ function handleRedeem(data) {
   try {
     var codigosSheet = getSheet('codigos');
     var codigosData = codigosSheet.getDataRange().getValues();
-    var codeRow = -1;
-    for (var i = 1; i < codigosData.length; i++) {
-      if (normalizeStored(codigosData[i][1]) === code) {
-        codeRow = i + 1;
-        break;
-      }
-    }
+    var found = findCodeRow(codigosData, code);
 
-    if (codeRow === -1) {
+    if (!found) {
       lock.releaseLock();
       return jsonResponse({ status: 'error', error: 'NOT_FOUND' });
     }
 
     // Check if already redeemed (canjeado_en = col I, index 8)
-    var canjeadoEn = String(codigosData[codeRow - 1][8] || '').trim();
+    var canjeadoEn = String(codigosData[found.index][8] || '').trim();
     if (canjeadoEn) {
       lock.releaseLock();
       return jsonResponse({ status: 'error', error: 'ALREADY_REDEEMED', canjeado_en: canjeadoEn });
     }
 
-    // Check expiry for carrito prizes
-    var premio = String(codigosData[codeRow - 1][3] || '').trim();
-    var ganado = String(codigosData[codeRow - 1][7] || '').trim();
-    var carritoPrizes = ['cafe', 'fria', 'collar', 'consolacion'];
-    if (carritoPrizes.indexOf(premio) >= 0 && ganado.slice(0, 10) !== colToday()) {
+    // Check expiry based on prize type
+    var premio = String(codigosData[found.index][3] || '').trim();
+    var ganado = String(codigosData[found.index][7] || '').trim();
+    if (isExpired(premio, ganado)) {
       lock.releaseLock();
       return jsonResponse({ status: 'error', error: 'EXPIRED', ganado_en: ganado });
     }
 
     // Mark as redeemed
     var ts = colTimestamp();
-    codigosSheet.getRange(codeRow, 9).setValue(ts); // I=canjeado_en
+    codigosSheet.getRange(found.row, 9).setValue(ts); // I=canjeado_en
 
     lock.releaseLock();
     return jsonResponse({ status: 'ok', redeemed: true, canjeado_en: ts });
@@ -267,7 +317,9 @@ function handleRedeem(data) {
   }
 }
 
-// ─── ACTION: CLAIM (tuboleta prizes — user submits cedula) ───
+// ═══════════════════════════════════════════════════════════
+// ACTION: CLAIM (tuboleta prizes — user submits cedula)
+// ═══════════════════════════════════════════════════════════
 function handleClaim(data) {
   var code = normalizeCode(data.code || '');
   var cedula = (data.cedula || '').trim();
@@ -280,34 +332,29 @@ function handleClaim(data) {
   try {
     var codigosSheet = getSheet('codigos');
     var codigosData = codigosSheet.getDataRange().getValues();
-    var codeRow = -1;
-    for (var i = 1; i < codigosData.length; i++) {
-      if (normalizeStored(codigosData[i][1]) === code) {
-        codeRow = i + 1;
-        break;
-      }
-    }
+    var found = findCodeRow(codigosData, code);
 
-    if (codeRow === -1) {
+    if (!found) {
       lock.releaseLock();
       return jsonResponse({ status: 'error', error: 'NOT_FOUND' });
     }
 
-    // Check if already claimed (cedula = col J, index 9)
-    var existingCedula = String(codigosData[codeRow - 1][9] || '').trim();
-    if (existingCedula) {
+    // Check if already claimed (datos_enviados = col K, index 10)
+    var existingDatos = String(codigosData[found.index][10] || '').trim();
+    if (existingDatos) {
       lock.releaseLock();
-      return jsonResponse({ status: 'error', error: 'ALREADY_REDEEMED' });
+      return jsonResponse({ status: 'error', error: 'ALREADY_CLAIMED' });
     }
 
     // Save claim data
-    codigosSheet.getRange(codeRow, 10).setValue(cedula);        // J=cedula
-    codigosSheet.getRange(codeRow, 9).setValue(colTimestamp());  // I=canjeado_en
-    if (claimName) codigosSheet.getRange(codeRow, 5).setValue(claimName);   // E=nombre
-    if (claimEmail) codigosSheet.getRange(codeRow, 6).setValue(claimEmail); // F=email
+    var ts = colTimestamp();
+    codigosSheet.getRange(found.row, 10).setValue(cedula);    // J=cedula
+    codigosSheet.getRange(found.row, 11).setValue(ts);        // K=datos_enviados
+    if (claimName) codigosSheet.getRange(found.row, 5).setValue(claimName);   // E=nombre
+    if (claimEmail) codigosSheet.getRange(found.row, 6).setValue(claimEmail); // F=email
 
     lock.releaseLock();
-    return jsonResponse({ status: 'ok', claimed: true });
+    return jsonResponse({ status: 'ok', claimed: true, datos_enviados: ts });
 
   } catch (error) {
     try { lock.releaseLock(); } catch(e2) {}
@@ -315,7 +362,27 @@ function handleClaim(data) {
   }
 }
 
-// ─── GET HANDLER ───
+// ═══════════════════════════════════════════════════════════
+// ACTION: EVENT (analytics beacon)
+// ═══════════════════════════════════════════════════════════
+function handleEvent(data) {
+  var logSheet = getSheet('log');
+  if (!logSheet) return jsonResponse({ status: 'ok' });
+
+  var ts = colTimestamp();
+  var eventName = String(data.event || '').slice(0, 50);
+  var code = String(data.code || '').slice(0, 10);
+  var extra = String(data.extra || '').slice(0, 200);
+
+  // Log events as a special row: timestamp, event type, code, extra, '', 'EVENT', timestamp
+  logSheet.appendRow([ts, eventName, code, extra, '', 'EVENT', ts]);
+
+  return jsonResponse({ status: 'ok' });
+}
+
+// ═══════════════════════════════════════════════════════════
+// GET HANDLER
+// ═══════════════════════════════════════════════════════════
 function doGet(e) {
   try {
     var params = e.parameter || {};
@@ -323,6 +390,8 @@ function doGet(e) {
 
     if (action === 'status') return handleStatus(params);
     if (action === 'lookup') return handleLookup(params);
+    if (action === 'board')  return handleBoard(params);
+    if (action === 'ping')   return handlePing();
 
     // Default: API status
     return jsonResponse({
@@ -335,21 +404,22 @@ function doGet(e) {
   }
 }
 
-// ─── ACTION: STATUS ───
+// ═══════════════════════════════════════════════════════════
+// ACTION: STATUS
+// ═══════════════════════════════════════════════════════════
 function handleStatus(params) {
   var today = params.date || colToday();
   var logSheet = getSheet('log');
   var counts = logSheet ? countPrizesToday(logSheet, today) : {};
+  var remaining = getRemainingQuotas(counts);
 
   // Also get used codes for client cache sync
-  // Columns: A=numero, B=codigo(index 1), C=usado(index 2)
   var codigosSheet = getSheet('codigos');
   var usedCodes = [];
   if (codigosSheet) {
     var data = codigosSheet.getDataRange().getValues();
     for (var i = 1; i < data.length; i++) {
-      var usedFlag = String(data[i][2]).trim().toUpperCase();
-      if (usedFlag === 'SI' || usedFlag === 'SÍ' || usedFlag === 'TRUE' || usedFlag === '1') {
+      if (isUsed(data[i][2])) {
         usedCodes.push(normalizeStored(data[i][1]));
       }
     }
@@ -359,37 +429,103 @@ function handleStatus(params) {
     status: 'ok',
     date: today,
     prizes: counts,
+    remaining: remaining,
     usedCodes: usedCodes
   });
 }
 
-// ─── ACTION: LOOKUP ───
+// ═══════════════════════════════════════════════════════════
+// ACTION: LOOKUP
+// ═══════════════════════════════════════════════════════════
 function handleLookup(params) {
   var code = normalizeCode(params.code || '');
   var codigosSheet = getSheet('codigos');
   if (!codigosSheet) return jsonResponse({ status: 'error', error: 'SERVER_ERROR' });
   var data = codigosSheet.getDataRange().getValues();
-  for (var i = 1; i < data.length; i++) {
-    if (normalizeStored(data[i][1]) === code) {
-      var usado = String(data[i][2]).trim().toUpperCase();
-      if (usado === 'SI' || usado === 'SÍ' || usado === 'TRUE' || usado === '1') {
-        return jsonResponse({
-          status: 'ok',
-          used: true,
-          prize: String(data[i][3]).trim(),
-          name: String(data[i][4]).trim(),
-          ganado_en: String(data[i][7]).trim(),
-          canjeado_en: String(data[i][8]).trim()
-        });
-      }
-      return jsonResponse({ status: 'ok', used: false });
-    }
+  var found = findCodeRow(data, code);
+
+  if (!found) {
+    return jsonResponse({ status: 'error', error: 'NOT_FOUND' });
   }
-  return jsonResponse({ status: 'error', error: 'NOT_FOUND' });
+
+  var row = data[found.index];
+  if (isUsed(row[2])) {
+    var premio = String(row[3]).trim();
+    var ganadoEn = String(row[7]).trim();
+    return jsonResponse({
+      status: 'ok',
+      used: true,
+      prize: premio,
+      name: String(row[4]).trim(),
+      n: String(row[0]).trim(),
+      ganado_en: ganadoEn,
+      canjeado_en: String(row[8]).trim(),
+      datos_enviados: String(row[10] || '').trim(),
+      expired: isExpired(premio, ganadoEn)
+    });
+  }
+  return jsonResponse({ status: 'ok', used: false });
 }
 
-// ─── UTILITY: Initialize codes sheet ───
-// Run this once manually from Apps Script editor to populate the codigos sheet
+// ═══════════════════════════════════════════════════════════
+// ACTION: BOARD (tablero — last 8 plays + remaining quotas)
+// ═══════════════════════════════════════════════════════════
+function handleBoard(params) {
+  var today = params.date || colToday();
+  var codigosSheet = getSheet('codigos');
+  var logSheet = getSheet('log');
+
+  if (!codigosSheet) return jsonResponse({ status: 'error', error: 'SERVER_ERROR' });
+
+  var counts = logSheet ? countPrizesToday(logSheet, today) : {};
+  var remaining = getRemainingQuotas(counts);
+
+  // Get last 8 played codes sorted by ganado_en descending
+  var data = codigosSheet.getDataRange().getValues();
+  var played = [];
+  for (var i = 1; i < data.length; i++) {
+    if (isUsed(data[i][2])) {
+      played.push({
+        n: String(data[i][0]).trim(),
+        premio: String(data[i][3]).trim(),
+        nombre: String(data[i][4]).trim(),
+        ganado_en: String(data[i][7]).trim()
+      });
+    }
+  }
+
+  // Sort by ganado_en descending
+  played.sort(function(a, b) {
+    return a.ganado_en > b.ganado_en ? -1 : a.ganado_en < b.ganado_en ? 1 : 0;
+  });
+
+  // Take last 8
+  var last8 = played.slice(0, 8);
+
+  return jsonResponse({
+    status: 'ok',
+    date: today,
+    remaining: remaining,
+    total_played: played.length,
+    last: last8
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// ACTION: PING (health check)
+// ═══════════════════════════════════════════════════════════
+function handlePing() {
+  return jsonResponse({
+    status: 'ok',
+    ts: colTimestamp(),
+    date: colToday()
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILITY: Initialize codes sheet
+// Run this once manually from Apps Script editor
+// ═══════════════════════════════════════════════════════════
 function initCodes() {
   var codes = ["RTV-04OG","RTV-0E09","RTV-18YW","RTV-1LXA","RTV-1VIW","RTV-26LO","RTV-27GJ","RTV-2O2N","RTV-2OQL","RTV-2R6M","RTV-2SR5","RTV-2T01","RTV-2VXW","RTV-2XDN","RTV-34I8","RTV-3GI8","RTV-3HYM","RTV-3J1F","RTV-3SHA","RTV-42U6","RTV-4L9O","RTV-4OHB","RTV-4PRV","RTV-4Y8M","RTV-50NW","RTV-576O","RTV-5DWQ","RTV-5ET2","RTV-5GJ8","RTV-5SND","RTV-5XO2","RTV-62KN","RTV-63L7","RTV-648Y","RTV-6XMM","RTV-6YOS","RTV-70AU","RTV-7BT4","RTV-7LHQ","RTV-7RSA","RTV-7YLJ","RTV-834Z","RTV-868X","RTV-8BDX","RTV-8QVV","RTV-8RZE","RTV-8SJW","RTV-8U2F","RTV-90E3","RTV-95Y5","RTV-9729","RTV-98I3","RTV-99GS","RTV-9B8X","RTV-9OAH","RTV-9Q8Y","RTV-9UEK","RTV-AAU7","RTV-ADAE","RTV-ADVZ","RTV-AH4U","RTV-AS54","RTV-AVS8","RTV-BGFX","RTV-BHE4","RTV-BQFI","RTV-BRA3","RTV-BV2F","RTV-BVC7","RTV-C2IW","RTV-CZWF","RTV-D0MJ","RTV-D0OQ","RTV-D3Q3","RTV-D5BM","RTV-D60E","RTV-DG6H","RTV-DIVU","RTV-DJ8G","RTV-DSSL","RTV-DY2S","RTV-DZUU","RTV-E1L6","RTV-EDDT","RTV-ENHC","RTV-ES1V","RTV-ESS4","RTV-EWEE","RTV-F0XE","RTV-FLU1","RTV-FLZB","RTV-FUUT","RTV-G099","RTV-G0AV","RTV-G3PP","RTV-GODD","RTV-GTF5","RTV-GWF6","RTV-GXG8","RTV-HF9P","RTV-HKJU","RTV-HQVG","RTV-IEBZ","RTV-IV85","RTV-J1HJ","RTV-J2S6","RTV-J4L4","RTV-J5RU","RTV-J80C","RTV-JAHQ","RTV-JFAJ","RTV-JMXO","RTV-JWCY","RTV-KAWB","RTV-KLJC","RTV-KMJR","RTV-KQ5Z","RTV-KTM9","RTV-LKLE","RTV-LMG9","RTV-LSL6","RTV-LUZY","RTV-M0PA","RTV-M1AS","RTV-MHMW","RTV-MXXB","RTV-NNHF","RTV-NTQ0","RTV-O61O","RTV-OCZX","RTV-OPOC","RTV-P1VV","RTV-P4Z8","RTV-PHET","RTV-PKJB","RTV-POVR","RTV-Q1GZ","RTV-Q884","RTV-QFWI","RTV-QOAZ","RTV-QQ79","RTV-QRA6","RTV-R7JP","RTV-R7JR","RTV-RA8N","RTV-RCJR","RTV-RE22","RTV-RE2U","RTV-RI5W","RTV-RJL7","RTV-RL1I","RTV-RP36","RTV-RTBH","RTV-S33U","RTV-S3YQ","RTV-S5XA","RTV-S8F4","RTV-SCMU","RTV-SDY7","RTV-SJP0","RTV-SPMV","RTV-SSS2","RTV-STDJ","RTV-SXFS","RTV-TADL","RTV-TB89","RTV-THML","RTV-TMQG","RTV-TMUZ","RTV-TR2U","RTV-TUYL","RTV-U8N8","RTV-UAZN","RTV-UDJP","RTV-UMNI","RTV-UNXU","RTV-V4TX","RTV-VC2D","RTV-VE86","RTV-VE9R","RTV-VHQH","RTV-VJ54","RTV-WP8V","RTV-WSJ4","RTV-WTFT","RTV-X7YO","RTV-XCXB","RTV-XM6E","RTV-XVQS","RTV-Y10G","RTV-Y1KR","RTV-Y4S7","RTV-Y7O8","RTV-YCOH","RTV-YMY7","RTV-YQM3","RTV-YU7M","RTV-YYHJ","RTV-ZK82","RTV-ZLQL"];
 
@@ -399,13 +535,13 @@ function initCodes() {
     sheet = getSheet('codigos');
   }
 
-  // Set headers (10 columns: numero first)
-  sheet.getRange(1, 1, 1, 10).setValues([['numero', 'codigo', 'usado', 'premio', 'nombre', 'email', 'whatsapp', 'ganado_en', 'canjeado_en', 'cedula']]);
+  // Set headers (11 columns: numero + datos_enviados)
+  sheet.getRange(1, 1, 1, 11).setValues([['numero', 'codigo', 'usado', 'premio', 'nombre', 'email', 'whatsapp', 'ganado_en', 'canjeado_en', 'cedula', 'datos_enviados']]);
 
   // Write codes with numero 001-200
   var pad3 = function(n) { return n < 10 ? '00' + n : n < 100 ? '0' + n : '' + n; };
-  var rows = codes.map(function(c, idx) { return [pad3(idx + 1), c, '', '', '', '', '', '', '', '']; });
-  sheet.getRange(2, 1, rows.length, 10).setValues(rows);
+  var rows = codes.map(function(c, idx) { return [pad3(idx + 1), c, '', '', '', '', '', '', '', '', '']; });
+  sheet.getRange(2, 1, rows.length, 11).setValues(rows);
 
   // Also ensure log sheet exists
   var logSheet = getSheet('log');
@@ -419,8 +555,9 @@ function initCodes() {
   initResumen();
 }
 
-// ─── UTILITY: Initialize Resumen dashboard ───
-// Creates a "Resumen" sheet with formulas that auto-update from codigos
+// ═══════════════════════════════════════════════════════════
+// UTILITY: Initialize Resumen dashboard
+// ═══════════════════════════════════════════════════════════
 function initResumen() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Resumen');
@@ -467,24 +604,40 @@ function initResumen() {
     }
   }
 
-  // ── Section 3: Premios del carrito pendientes hoy ──
+  // ── Section 3: Premios del mostrador pendientes hoy ──
   var secRow = 9 + prizes.length + 1;
-  sheet.getRange('A' + secRow).setValue('PREMIOS DEL CARRITO PENDIENTES HOY').setFontWeight('bold').setFontSize(11);
+  sheet.getRange('A' + secRow).setValue('PREMIOS MOSTRADOR PENDIENTES HOY').setFontWeight('bold').setFontSize(11);
   secRow++;
   sheet.getRange('A' + secRow).setValue('Premio');
   sheet.getRange('B' + secRow).setValue('Pendientes');
   sheet.getRange('A' + secRow + ':B' + secRow).setFontWeight('bold');
 
-  var carritoPrizes = ['cafe', 'fria', 'collar', 'consolacion'];
-  for (var j = 0; j < carritoPrizes.length; j++) {
+  var mostradorPrizes = ['cafe', 'fria', 'collar', 'consolacion'];
+  for (var j = 0; j < mostradorPrizes.length; j++) {
     secRow++;
-    var pName = prizes.filter(function(p) { return p.id === carritoPrizes[j]; })[0].name;
+    var pName = prizes.filter(function(p) { return p.id === mostradorPrizes[j]; })[0].name;
     sheet.getRange('A' + secRow).setValue(pName);
-    // Ganado (premio = X) AND usado = SI AND canjeado_en está vacío
-    sheet.getRange('B' + secRow).setFormula('=COUNTIFS(codigos!D2:D201,"' + carritoPrizes[j] + '",codigos!I2:I201,"",codigos!C2:C201,"SI")');
+    sheet.getRange('B' + secRow).setFormula('=COUNTIFS(codigos!D2:D201,"' + mostradorPrizes[j] + '",codigos!I2:I201,"",codigos!C2:C201,"SI")');
   }
 
-  // ── Section 4: Últimas 10 jugadas ──
+  // ── Section 4: Datos tuboleta pendientes ──
+  secRow += 2;
+  sheet.getRange('A' + secRow).setValue('DATOS TUBOLETA PENDIENTES').setFontWeight('bold').setFontSize(11);
+  secRow++;
+  sheet.getRange('A' + secRow).setValue('Premio');
+  sheet.getRange('B' + secRow).setValue('Sin datos');
+  sheet.getRange('A' + secRow + ':B' + secRow).setFontWeight('bold');
+
+  var tuboletaPrizes = ['desc20', 'entrada'];
+  for (var k = 0; k < tuboletaPrizes.length; k++) {
+    secRow++;
+    var tName = prizes.filter(function(p) { return p.id === tuboletaPrizes[k]; })[0].name;
+    sheet.getRange('A' + secRow).setValue(tName);
+    // Premio = X AND usado = SI AND datos_enviados vacío
+    sheet.getRange('B' + secRow).setFormula('=COUNTIFS(codigos!D2:D201,"' + tuboletaPrizes[k] + '",codigos!K2:K201,"",codigos!C2:C201,"SI")');
+  }
+
+  // ── Section 5: Últimas 10 jugadas ──
   secRow += 2;
   sheet.getRange('A' + secRow).setValue('ÚLTIMAS 10 JUGADAS').setFontWeight('bold').setFontSize(11);
   secRow++;
@@ -493,19 +646,21 @@ function initResumen() {
   sheet.getRange('C' + secRow).setValue('Premio');
   sheet.getRange('D' + secRow).setValue('Ganado');
   sheet.getRange('E' + secRow).setValue('Canjeado');
-  sheet.getRange('A' + secRow + ':E' + secRow).setFontWeight('bold');
+  sheet.getRange('F' + secRow).setValue('Datos env.');
+  sheet.getRange('A' + secRow + ':F' + secRow).setFontWeight('bold');
   secRow++;
 
   // QUERY: last 10 played codes sorted by ganado_en descending
-  var queryFormula = '=IFERROR(QUERY(codigos!A2:J201,"SELECT A,B,D,H,I WHERE C=\'SI\' ORDER BY H DESC LIMIT 10",0),"Sin jugadas aún")';
+  var queryFormula = '=IFERROR(QUERY(codigos!A2:K201,"SELECT A,B,D,H,I,K WHERE C=\'SI\' ORDER BY H DESC LIMIT 10",0),"Sin jugadas aún")';
   sheet.getRange('A' + secRow).setFormula(queryFormula);
 
   // ── Formatting ──
   sheet.setColumnWidth(1, 200);
   sheet.setColumnWidth(2, 120);
   sheet.setColumnWidth(3, 80);
-  sheet.setColumnWidth(4, 120);
+  sheet.setColumnWidth(4, 160);
   sheet.setColumnWidth(5, 160);
+  sheet.setColumnWidth(6, 160);
 
   // Protect sheet as read-only
   var protection = sheet.protect().setDescription('Resumen - Solo lectura');
