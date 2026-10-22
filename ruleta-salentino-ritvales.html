@@ -678,20 +678,24 @@
     <div class="form-group">
       <span class="field-icon">_código</span>
       <input type="text" id="inputCode" placeholder="RTV-XXXX" maxlength="8" autocomplete="off" inputmode="text">
+      <div class="field-error" id="errorCode"></div>
     </div>
     <a href="#" id="changeCodeLink" class="change-code-link" style="display:none" onclick="event.preventDefault();clearQrCode()">Cambiar código</a>
     <div class="code-divider"><span>TUS DATOS</span></div>
     <div class="form-group">
       <span class="field-icon">_nombre</span>
       <input type="text" id="inputName" placeholder="Tu nombre" maxlength="60" autocomplete="name">
+      <div class="field-error" id="errorName"></div>
     </div>
     <div class="form-group">
       <span class="field-icon">_correo</span>
       <input type="email" id="inputEmail" placeholder="correo@ejemplo.com" autocomplete="email">
+      <div class="field-error" id="errorEmail"></div>
     </div>
     <div class="form-group">
       <span class="field-icon">_cel</span>
       <input type="tel" id="inputPhone" placeholder="300 123 4567" maxlength="12" autocomplete="tel" inputmode="numeric">
+      <div class="field-error" id="errorPhone"></div>
     </div>
     <div class="consent-row" id="consentRow">
       <input type="checkbox" id="consentCheck">
@@ -1110,16 +1114,30 @@ function validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emai
 
 var codeAttempts = 0, MAX_ATTEMPTS = 5, cooldownUntil = 0;
 
+function showFieldError(inputId, errorId, msg) {
+  document.getElementById(inputId).classList.add('error');
+  var errEl = document.getElementById(errorId);
+  errEl.textContent = msg;
+  errEl.classList.add('visible');
+}
 function showError(msg) {
   var el = document.getElementById('errorMsg');
   el.textContent = msg; el.classList.add('visible');
 }
 function clearErrors() {
   document.getElementById('errorMsg').classList.remove('visible');
-  document.getElementById('inputCode').classList.remove('error');
-  document.getElementById('inputName').classList.remove('error');
-  document.getElementById('inputEmail').classList.remove('error');
-  document.getElementById('inputPhone').classList.remove('error');
+  var fields = [
+    ['inputCode', 'errorCode'],
+    ['inputName', 'errorName'],
+    ['inputEmail', 'errorEmail'],
+    ['inputPhone', 'errorPhone']
+  ];
+  for (var i = 0; i < fields.length; i++) {
+    document.getElementById(fields[i][0]).classList.remove('error');
+    var errEl = document.getElementById(fields[i][1]);
+    errEl.textContent = '';
+    errEl.classList.remove('visible');
+  }
   document.getElementById('attemptsWarn').classList.remove('visible');
 }
 
@@ -1149,32 +1167,28 @@ function submitAndSpin() {
   consentRow.classList.remove('error-consent');
 
   if (!code || code.length < 8) {
-    codeInput.classList.add('error');
-    showError('Ingresa el código de tu compra');
+    showFieldError('inputCode', 'errorCode', 'Ingresa el código de tu compra');
     codeInput.focus(); return;
   }
   if (!name || name.length < 2) {
-    nameInput.classList.add('error');
-    showError('Ingresa tu nombre'); nameInput.focus(); return;
+    showFieldError('inputName', 'errorName', 'Ingresa tu nombre');
+    nameInput.focus(); return;
   }
   if (name.length > 60) {
-    nameInput.classList.add('error');
-    showError('Nombre muy largo (máx 60 caracteres)');
+    showFieldError('inputName', 'errorName', 'Máximo 60 caracteres');
     nameInput.focus(); return;
   }
   if (!validateEmail(email)) {
-    emailInput.classList.add('error');
-    showError('Correo electrónico no válido');
+    showFieldError('inputEmail', 'errorEmail', 'Correo no válido');
     emailInput.focus(); return;
   }
   if (!validatePhone(phone)) {
-    phoneInput.classList.add('error');
-    showError('WhatsApp: 10 dígitos (ej: 3001234567)');
+    showFieldError('inputPhone', 'errorPhone', '10 dígitos (ej: 3001234567)');
     phoneInput.focus(); return;
   }
   if (!consentCheck.checked) {
     consentRow.classList.add('error-consent');
-    showError('Debes autorizar el tratamiento de datos para participar');
+    showError('Autoriza el tratamiento de datos para participar');
     return;
   }
 
@@ -1209,19 +1223,17 @@ function submitAndSpin() {
       var err = data.error || 'SERVER_ERROR';
       if (err === 'NOT_FOUND') {
         codeAttempts++;
-        codeInput.classList.add('error');
         if (codeAttempts >= MAX_ATTEMPTS) {
           cooldownUntil = Date.now() + 30000;
-          showError('Demasiados intentos. Espera 30 segundos.');
+          showFieldError('inputCode', 'errorCode', 'Demasiados intentos. Espera 30 segundos.');
           var warn = document.getElementById('attemptsWarn');
           warn.textContent = 'Compra un café en el punto Salentino para obtener tu código.';
           warn.classList.add('visible');
         } else {
-          showError('Código no válido (' + (MAX_ATTEMPTS - codeAttempts) + ' intentos restantes)');
+          showFieldError('inputCode', 'errorCode', 'Código no válido (' + (MAX_ATTEMPTS - codeAttempts) + ' intentos)');
         }
       } else if (err === 'USED') {
-        codeInput.classList.add('error');
-        showError('Este código ya fue utilizado');
+        showFieldError('inputCode', 'errorCode', 'Este código ya fue utilizado');
       } else if (err === 'RATE_LIMIT') {
         cooldownUntil = Date.now() + 10000;
         showError('Demasiadas solicitudes. Espera unos segundos.');
