@@ -152,74 +152,92 @@
     overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
 
-  /* ─── PRIZE CARD ─── */
+  /* ─── PRIZE CARD (liquid glass) ─── */
   .prize-card {
     position: relative;
-    background: linear-gradient(165deg, rgba(130,253,71,0.05) 0%, rgba(34,79,209,0.03) 50%, rgba(125,59,237,0.04) 100%);
-    border: 1.5px solid rgba(130,253,71,0.12);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 20px;
-    padding: 24px 20px 20px;
+    padding: 28px 20px 20px;
     max-width: 340px; width: 100%;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 60px rgba(130,253,71,0.04), inset 0 1px 0 rgba(255,255,255,0.04);
+    backdrop-filter: blur(24px) saturate(1.4); -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.2);
     opacity: 0; transform: translateY(30px) scale(0.95);
+    overflow: hidden;
+  }
+  /* Top accent bar — color set by JS via --accent-color */
+  .prize-card::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--accent-color, var(--green));
+    border-radius: 20px 20px 0 0;
   }
   .prize-card::before {
     content: ''; position: absolute; inset: -1px; border-radius: 21px; z-index: -1;
-    background: conic-gradient(from 0deg, rgba(130,253,71,0.15), rgba(34,79,209,0.1), rgba(125,59,237,0.1), rgba(130,253,71,0.15));
+    background: conic-gradient(from 0deg, rgba(130,253,71,0.12), rgba(34,79,209,0.06), rgba(125,59,237,0.06), rgba(130,253,71,0.12));
     opacity: 0; transition: opacity 0.6s;
   }
   .prize-card.glow::before { opacity: 1; }
 
-  .result-screen .r-label { font-size: 10px; letter-spacing: 6px; text-transform: uppercase; color: var(--steel); margin-bottom: 6px; opacity: 0; }
+  .result-screen .r-label { font-size: 10px; letter-spacing: 6px; text-transform: uppercase; color: var(--green); margin-bottom: 4px; opacity: 0; }
   .result-screen .r-name {
-    font-size: clamp(20px, 6vw, 30px); font-weight: 700; color: var(--green);
-    text-shadow: 0 0 40px rgba(130,253,71,0.2), 0 0 80px rgba(130,253,71,0.08);
+    font-size: clamp(22px, 7vw, 32px); font-weight: 700; color: #EFFFFE;
     line-height: 1.1; margin-bottom: 10px; max-width: 300px; opacity: 0;
   }
   .result-screen .r-desc {
-    font-size: 12px; color: #EFFFFE; line-height: 1.7; max-width: 280px;
-    margin: 0 auto 16px; opacity: 0;
+    font-size: 12px; color: rgba(239,255,254,0.75); line-height: 1.6; max-width: 280px;
+    margin: 0 auto 14px; opacity: 0;
   }
 
   .result-screen .r-divider {
-    width: 40px; height: 1px; margin: 0 auto 16px;
-    background: linear-gradient(90deg, transparent, rgba(130,253,71,0.3), transparent);
+    width: 100%; height: 1px; margin: 0 auto 14px;
+    background: rgba(255,255,255,0.06);
     opacity: 0;
   }
 
-  .result-screen .r-player {
-    display: none;
-  }
+  .result-screen .r-player { display: none; }
 
-  .prize-clock { font-family: var(--mono); font-size: 22px; font-weight: 700; color: #EFFFFE; letter-spacing: 1px; text-align: center; margin: 0 0 8px; font-variant-numeric: tabular-nums; }
-  .prize-meta { font-size: 10px; color: #EFFFFE; opacity: 0.7; letter-spacing: 0.5px; text-align: center; margin-bottom: 8px; line-height: 1.4; }
-  .prize-status { font-size: 11px; letter-spacing: 1px; text-align: center; margin-bottom: 8px; font-weight: 700; }
-  .prize-status.pending { color: var(--green); }
-  .prize-status.redeemed { color: var(--steel); opacity: 0.5; }
-  .prize-status.expired { color: var(--red); text-decoration: line-through; }
-  .prize-redeem-link { font-size: 11px; color: var(--steel); opacity: 0.5; text-decoration: underline; text-align: center; display: block; cursor: pointer; }
-  .prize-redeem-link:hover { opacity: 0.8; }
+  .prize-clock { font-family: var(--mono); font-size: 32px; font-weight: 700; color: #EFFFFE; letter-spacing: 2px; text-align: center; margin: 0 0 6px; font-variant-numeric: tabular-nums; }
+  .prize-meta { font-size: 9px; color: rgba(239,255,254,0.5); letter-spacing: 0.3px; text-align: center; margin-bottom: 12px; line-height: 1.5; }
+  .prize-status {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px; text-align: center; margin: 0 auto 10px; font-weight: 400;
+    display: inline-block; padding: 6px 16px; border-radius: 20px; border: 1px solid transparent;
+  }
+  .prize-status-wrap { text-align: center; margin-bottom: 8px; }
+  .prize-status.pending { color: var(--green); border-color: rgba(130,253,71,0.3); background: rgba(130,253,71,0.04); }
+  .prize-status.redeemed { color: var(--steel); opacity: 0.5; border-color: rgba(255,255,255,0.1); }
+  .prize-status.expired { color: var(--red); text-decoration: line-through; border-color: rgba(255,75,67,0.2); }
+  .prize-redeem-link { font-size: 11px; color: rgba(239,255,254,0.4); text-decoration: underline; text-align: center; display: block; cursor: pointer; margin-top: 4px; }
+  .prize-redeem-link:hover { color: rgba(239,255,254,0.7); }
+
+  .btn-share-story {
+    display: block; width: 100%; max-width: 340px; margin: 14px auto 0;
+    font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    padding: 14px 20px; border-radius: 12px; cursor: pointer; border: none;
+    background: var(--green); color: var(--black);
+    box-shadow: 0 4px 20px rgba(130,253,71,0.25);
+    transition: transform 0.1s, box-shadow 0.2s; opacity: 0;
+  }
+  .btn-share-story:active { transform: scale(0.97); box-shadow: 0 2px 12px rgba(130,253,71,0.35); }
 
   .btn-play-again {
     font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 3px;
-    text-transform: uppercase; padding: 12px 28px; border-radius: 10px; cursor: pointer;
-    border: 1.5px solid rgba(130,253,71,0.25); background: rgba(130,253,71,0.04); color: var(--green);
-    margin-top: 16px; opacity: 0; transition: background 0.2s, transform 0.1s;
+    text-transform: uppercase; padding: 14px 28px; border-radius: 12px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: rgba(239,255,254,0.6);
+    margin-top: 10px; opacity: 0; transition: background 0.2s, transform 0.1s;
+    width: 100%; max-width: 340px;
   }
   .btn-play-again:active { transform: scale(0.97); background: rgba(130,253,71,0.1); }
 
   /* Winner (tuboleta) variant */
   .result-screen.winner .prize-card {
-    background: linear-gradient(165deg, rgba(236,110,37,0.06) 0%, rgba(255,75,67,0.03) 50%, rgba(34,79,209,0.04) 100%);
-    border-color: rgba(236,110,37,0.15);
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 60px rgba(236,110,37,0.06), inset 0 1px 0 rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.2);
   }
   .result-screen.winner .prize-card::before {
-    background: conic-gradient(from 0deg, rgba(236,110,37,0.2), rgba(255,75,67,0.1), rgba(34,79,209,0.1), rgba(236,110,37,0.2));
+    background: conic-gradient(from 0deg, rgba(236,110,37,0.15), rgba(255,75,67,0.08), rgba(34,79,209,0.08), rgba(236,110,37,0.15));
   }
-  .result-screen.winner .r-name { color: var(--orange); text-shadow: 0 0 40px rgba(236,110,37,0.3), 0 0 80px rgba(236,110,37,0.1); }
-  .result-screen.winner .r-phrase { color: var(--orange); }
+  .result-screen.winner .r-label { color: var(--orange); }
 
   /* ─── DELIVER BUTTON ─── */
   .btn-deliver {
@@ -262,7 +280,7 @@
   .tuboleta-confirm.visible { display: block; }
 
   .played-screen { flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; text-align: center; background: var(--black); z-index: 30; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .played-card { background: linear-gradient(160deg, rgba(130,253,71,0.06) 0%, rgba(125,59,237,0.04) 100%); border: 1.5px solid rgba(130,253,71,0.15); border-radius: 16px; padding: 28px 24px; max-width: 320px; width: 100%; margin-bottom: 20px; }
+  .played-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px 20px; max-width: 340px; width: 100%; margin-bottom: 16px; backdrop-filter: blur(24px) saturate(1.4); -webkit-backdrop-filter: blur(24px) saturate(1.4); box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06); }
   .played-card .played-label { font-size: 9px; letter-spacing: 4px; color: var(--steel); opacity: 0.5; margin-bottom: 6px; text-transform: uppercase; }
   .played-card .played-prize { font-size: clamp(20px, 6vw, 28px); font-weight: 700; color: var(--green); text-shadow: 0 0 30px rgba(130,253,71,0.2); line-height: 1.2; margin-bottom: 12px; }
   .played-card .played-desc { font-size: 11px; color: #EFFFFE; line-height: 1.6; margin-bottom: 14px; }
@@ -413,10 +431,10 @@
     </div>
     <div class="prize-clock" id="prizeClock"></div>
     <div class="prize-meta" id="prizeMeta"></div>
-    <div class="prize-status" id="prizeStatus"></div>
-    <a href="#" class="prize-redeem-link" id="prizeRedeemLink" style="display:none" onclick="event.preventDefault();redeemCarrito()">Uso del carrito &rarr;</a>
+    <div class="prize-status-wrap"><div class="prize-status" id="prizeStatus"></div></div>
+    <a href="#" class="prize-redeem-link" id="prizeRedeemLink" style="display:none" onclick="event.preventDefault();redeemCarrito()">Uso del carrito</a>
   </div>
-  <div class="r-player" id="rPlayer"></div>
+  <button class="btn-share-story" id="btnShareStory">COMPÁRTELO EN TU HISTORIA</button>
   <div class="social-links">
     <a href="" class="social-link social-ig" target="_blank">
       Instagram <span class="social-at">@</span><span class="social-handle"></span>
@@ -1040,13 +1058,16 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
     tuboletaWrap.style.display = 'none';
   }
 
+  // Set accent color on card
+  document.getElementById('prizeCard').style.setProperty('--accent-color', prize.color);
+
   updatePrizeCard(prize, playerName, currentResultCode, currentGanadoEn, canjeadoEn);
 
   // GSAP Timeline
   var card = document.getElementById('prizeCard');
   if (typeof gsap === 'undefined') {
     card.style.opacity = '1'; card.style.transform = 'none';
-    ['rLabel','rName','rDesc','rDivider','btnPlayAgain'].forEach(function(id) {
+    ['rLabel','rName','rDesc','rDivider','btnPlayAgain','btnShareStory'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
     });
@@ -1056,7 +1077,7 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
   var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
   gsap.set(card, { opacity: 0, y: 30, scale: 0.95 });
-  gsap.set(['#rLabel', '#rName', '#rDesc', '#rDivider', '#btnPlayAgain'], { opacity: 0, y: 15 });
+  gsap.set(['#rLabel', '#rName', '#rDesc', '#rDivider', '#btnShareStory', '#btnPlayAgain'], { opacity: 0, y: 15 });
 
   tl.to(card, { opacity: 1, y: 0, scale: 1, duration: 0.6 })
     .to('#rLabel', { opacity: 0.6, y: 0, duration: 0.3 }, '-=0.1')
@@ -1069,7 +1090,8 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
     gsap.set('#rTuboletaWrap', { opacity: 0, y: 15 });
   }
 
-  tl.to('#btnPlayAgain', { opacity: 1, y: 0, duration: 0.4 }, '+=0.3');
+  tl.to('#btnShareStory', { opacity: 1, y: 0, duration: 0.35 }, '+=0.2');
+  tl.to('#btnPlayAgain', { opacity: 1, y: 0, duration: 0.4 }, '-=0.1');
   tl.call(function() { card.classList.add('glow'); }, null, '-=0.6');
 
   if (isWinner) launchConfetti();
