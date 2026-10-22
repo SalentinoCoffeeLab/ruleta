@@ -945,6 +945,21 @@ function fetchServerStatus() {
     .catch(function(e) { serverConnected = false; throw e; });
 }
 
+// Analytics via sendBeacon (fire-and-forget)
+function trackEvent(event, extra) {
+  try {
+    var payload = JSON.stringify({
+      action: 'event',
+      event: event,
+      ts: new Date().toISOString(),
+      extra: extra || ''
+    });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(SHEET_URL, payload);
+    }
+  } catch(e) {}
+}
+
 // ═══════════════════════════════════════════════════════════
 // PRIZES (6 segments — server decides which one)
 // ═══════════════════════════════════════════════════════════
@@ -1370,6 +1385,7 @@ function triggerSpin() {
   wrap.classList.remove('idle');
   // Hide swipe hint
   document.getElementById('swipeHint').classList.add('hidden');
+  trackEvent('spin_trigger', data.prize.id);
   spin(data.prize, data.name, data.ganadoEn);
 }
 
@@ -1505,6 +1521,7 @@ function confirmRedeem() {
     pin: pin
   }).then(function(data) {
     if (data.status === 'ok') {
+      trackEvent('redeem_ok', currentResultCode);
       closeRedeemSheet();
       var statusEl = document.getElementById('prizeStatus');
       statusEl.className = 'prize-status redeemed';
@@ -1682,6 +1699,7 @@ function showResult(prize, playerName, ganadoEn, canjeadoEn) {
 
   // Confetti for all prizes
   launchConfetti();
+  trackEvent('prize_reveal', prize.id);
 }
 
 function playAgain() {
@@ -1731,6 +1749,7 @@ function submitTuboleta() {
     email: email
   }).then(function(data) {
     if (data.status === 'ok') {
+      trackEvent('tuboleta_sent', currentResultCode);
       // Replace form with sent state
       document.getElementById('tuboletaForm').style.display = 'none';
       btn.style.display = 'none';
@@ -2072,6 +2091,7 @@ function wrapText(ctx, text, maxW) {
 function shareStory() {
   var canvas = generateStoryImage();
   if (!canvas) return;
+  trackEvent('share_story', currentResultPrize ? currentResultPrize.id : '');
 
   canvas.toBlob(function(blob) {
     if (!blob) return;
@@ -2132,6 +2152,8 @@ document.addEventListener('touchmove', function(e) {
 }, { passive: false });
 
 window.addEventListener('resize', function() { drawWheel(currentAngle); });
+
+trackEvent('page_load');
 
 // ═══════════════════════════════════════════════════════════
 // POPULATE TERMS DYNAMIC VALUES
