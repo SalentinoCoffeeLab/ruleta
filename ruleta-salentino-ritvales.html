@@ -380,7 +380,7 @@
   .wheel-logo-row .logo-x { font-size: 12px; font-weight: 700; color: var(--green); }
   .wheel-divider { position: relative; display: block; margin-top: 10px; flex-shrink: 0; }
 
-  .header { text-align: center; flex-shrink: 0; width: 100%; margin-top: clamp(10px, 2vh, 22px); position: relative; }
+  .header { text-align: center; flex-shrink: 0; width: 100%; margin-top: clamp(8px, 1.5vh, 18px); margin-bottom: clamp(12px, 2.5vh, 24px); position: relative; }
   .player-greeting-name {
     font-family: var(--grotesk); font-size: clamp(28px, 7vw, 38px); line-height: 1.1; font-weight: 700;
     letter-spacing: -1px; color: var(--off-white); margin: 0;
@@ -391,12 +391,12 @@
   }
   .player-greeting-sub .hl { color: var(--green); font-weight: 700; }
 
-  .wheel-section { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; position: relative; }
+  .wheel-section { flex: 1; display: flex; align-items: flex-start; justify-content: center; width: 100%; min-height: 0; position: relative; padding-top: 10px; }
   .wheel-wrap {
     position: relative;
-    width: min(75vw, calc(100dvh - 420px)); height: min(75vw, calc(100dvh - 420px));
-    max-width: 300px; max-height: 300px;
-    min-width: 220px; min-height: 220px;
+    width: min(72vw, calc(100dvh - 440px)); height: min(72vw, calc(100dvh - 440px));
+    max-width: 290px; max-height: 290px;
+    min-width: 210px; min-height: 210px;
   }
 
   .pointer {
@@ -434,8 +434,8 @@
 
   .ticket-label {
     position: relative; flex-shrink: 0;
-    font-family: var(--mono); font-size: 11px; color: #A7B3AE;
-    padding: 5px 10px; border: 1px solid #2E3D27; margin-bottom: 10px;
+    font-family: var(--mono); font-size: 11px; color: #C9D3CE;
+    padding: 5px 10px; border: 1px solid #3A4D33; margin-bottom: 10px;
   }
   .ticket-label .ticket-code { color: var(--off-white); font-weight: 700; letter-spacing: 1px; }
 
@@ -506,13 +506,13 @@
     word-spacing: 0.05em;
   }
   .result-screen .r-desc {
-    font-family: var(--grotesk); font-size: clamp(15px, 4vw, 18px); font-weight: 700;
+    font-family: var(--grotesk); font-size: clamp(14px, 3.8vw, 16px); font-weight: 700;
     color: var(--off-white); line-height: 1.35; max-width: 320px;
     margin: 0 auto 4px; opacity: 0; text-align: center;
     position: relative; z-index: 1;
   }
   .result-screen .r-validity {
-    font-family: var(--mono); font-size: 12px; line-height: 18px; color: #C9D3CE;
+    font-family: var(--mono); font-size: 11px; line-height: 16px; color: #C9D3CE;
     margin: 4px auto 8px; text-align: center; position: relative; z-index: 1;
   }
 
@@ -562,30 +562,30 @@
     background: var(--accent-color, var(--green));
   }
   .pass-name {
-    font-family: var(--grotesk); font-size: clamp(24px, 7vw, 32px); font-weight: 700;
+    font-family: var(--grotesk); font-size: clamp(22px, 6.5vw, 30px); font-weight: 700;
     color: var(--off-white); text-transform: uppercase;
     margin-bottom: 4px; letter-spacing: -0.5px; line-height: 1.1;
   }
   .pass-ticket {
-    font-family: var(--mono); font-size: 12px; letter-spacing: 1px;
-    color: #A7B3AE; margin-bottom: 8px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1px;
+    color: #A7B3AE; margin-bottom: 6px;
   }
   .pass-instruction {
-    font-family: var(--grotesk); font-size: clamp(15px, 4vw, 18px); font-weight: 700;
+    font-family: var(--grotesk); font-size: clamp(14px, 3.8vw, 16px); font-weight: 700;
     text-transform: uppercase;
-    color: var(--off-white); margin: 6px 0 4px;
+    color: var(--off-white); margin: 4px 0 4px;
   }
   .consolacion-code {
-    font-family: var(--mono); font-size: 24px; font-weight: 700;
+    font-family: var(--mono); font-size: 22px; font-weight: 700;
     letter-spacing: 4px; color: var(--off-white);
-    padding: 10px 16px; margin: 8px auto;
+    padding: 8px 14px; margin: 6px auto;
     border: 1px solid rgba(130,253,71,0.2); display: inline-block;
   }
-  .pass-status-wrap { text-align: center; margin-top: 10px; margin-bottom: 4px; }
+  .pass-status-wrap { text-align: center; margin-top: 8px; margin-bottom: 2px; }
   .pass-status {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px;
     text-align: center; margin: 0 auto; font-weight: 400;
-    display: inline-block; padding: 6px 16px;
+    display: inline-block; padding: 5px 14px;
     border: 1px solid transparent;
   }
   .pass-status.active { display: none; }
@@ -597,9 +597,9 @@
     color: #FF8A84; border: 1px solid #FF8A84; border-radius: 0;
   }
   .pass-redeem-link {
-    font-family: var(--mono); font-size: 12px; color: #A7B3AE;
+    font-family: var(--mono); font-size: 11px; color: #A7B3AE;
     text-decoration: underline; text-align: center; display: block;
-    cursor: pointer; margin-top: 6px;
+    cursor: pointer; margin-top: 4px;
   }
   .pass-redeem-link:hover { color: var(--off-white); }
 
@@ -695,9 +695,9 @@
   }
 
   .tuboleta-note {
-    font-family: var(--mono); font-size: 11px; color: #A7B3AE; opacity: 0.85;
-    line-height: 1.5; text-align: center; margin-top: 8px; margin-bottom: 14px;
-    letter-spacing: 0.3px; padding: 8px 12px;
+    font-family: var(--mono); font-size: 10px; color: #A7B3AE; opacity: 0.85;
+    line-height: 1.5; text-align: center; margin-top: 6px; margin-bottom: 10px;
+    letter-spacing: 0.3px; padding: 6px 10px;
   }
   .tuboleta-confirm { display: none; font-family: var(--mono); font-size: 11px; color: var(--green); letter-spacing: 2px; margin-top: 12px; animation: fadeSlide 0.3s both; }
   .tuboleta-confirm.visible { display: block; }
@@ -865,7 +865,7 @@
   .change-code-link { font-family: var(--mono); font-size: 12px; color: var(--green); text-decoration: underline; margin-top: 4px; display: block; text-align: center; position: relative; z-index: 1; }
   .footer-phrase {
     font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
-    color: #8A9590; text-align: center; padding: 6px 0; margin-top: auto;
+    color: #C9D3CE; text-align: center; padding: 6px 0; margin-top: auto;
     text-transform: uppercase; position: relative; z-index: 1;
   }
   .social-links {
@@ -1242,7 +1242,7 @@ function trackEvent(event, extra) {
 var PRIZES = [
   { id: 'cafe',        label: 'AEROPRESS',            title: 'Aeropress',                              color: '#EFFFFE', textColor: '#020102', uiColor: '#EFFFFE', textOnColor: '#020102', titleSize: 58, cupo: 30, desc: 'Muestra esta pantalla en Salentino y reclama tu Aeropress.', validity: 'V\u00e1lido solo hoy, hasta el cierre.', type: 'mostrador' },
   { id: 'fria',        label: 'BEBIDA FR\u00cdA',     title: 'Bebida fr\u00eda',                       color: '#82FD47', textColor: '#020102', uiColor: '#82FD47', textOnColor: '#020102', titleSize: 52, cupo: 15, desc: 'Muestra esta pantalla en Salentino y elige tu bebida: cold brew, cold brew tonic o iced latte.', validity: 'V\u00e1lido solo hoy, hasta el cierre.', type: 'mostrador' },
-  { id: 'collar',      label: 'COLLAR\nRITVALES',     title: 'Collar Ritvales',                        color: '#7D3BED', textColor: '#EFFFFE', uiColor: '#B591F7', textOnColor: '#020102', titleSize: 52, cupo: 10, desc: 'Muestra esta pantalla en Salentino y reclama tu collar Ritvales.', validity: 'V\u00e1lido solo hoy, hasta el cierre.', type: 'mostrador' },
+  { id: 'collar',      label: 'COLLAR\nRITVALES',     title: 'Collar',                                 color: '#7D3BED', textColor: '#EFFFFE', uiColor: '#B591F7', textOnColor: '#020102', titleSize: 52, cupo: 10, desc: 'Muestra esta pantalla en Salentino y reclama tu collar Ritvales.', validity: 'V\u00e1lido solo hoy, hasta el cierre.', type: 'mostrador' },
   { id: 'desc20',      label: '20% DCTO\nBOLETER\u00cdA', title: '20 % en boletería Ritvales',         color: '#224FD1', textColor: '#EFFFFE', uiColor: '#6F8FF0', textOnColor: '#020102', titleSize: 44, cupo: 8,  desc: 'Ritvales te env\u00eda el c\u00f3digo de descuento a tu correo. Completa tus datos abajo.', validity: '', type: 'tuboleta' },
   { id: 'entrada',     label: 'ENTRADA\nGENERAL',     title: 'Entrada general Ritvales',                color: '#FF4B43', textColor: '#EFFFFE', uiColor: '#FF4B43', textOnColor: '#EFFFFE', titleSize: 44, cupo: 3,  desc: 'Ritvales te env\u00eda la entrada a tu correo. Completa tus datos abajo.', validity: '', type: 'tuboleta' },
   { id: 'consolacion', label: CONSOLACION_PCT + '% DCTO\nCAF\u00c9', title: CONSOLACION_PCT + ' % en caf\u00e9s especiales Salentino', color: '#AEE1F6', textColor: '#020102', uiColor: '#AEE1F6', textOnColor: '#020102', titleSize: 38, cupo: 9999, desc: 'Muestra esta pantalla en Salentino y aplica el descuento en tu compra de caf\u00e9.', validity: 'V\u00e1lido solo hoy, hasta el cierre.', type: 'mostrador' },
