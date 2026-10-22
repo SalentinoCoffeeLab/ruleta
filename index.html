@@ -682,7 +682,7 @@
     <span class="corner-bl"></span>
     <div class="form-group">
       <span class="field-icon">_código</span>
-      <input type="text" id="inputCode" placeholder="RTV-XXXX" maxlength="8" autocomplete="off" inputmode="text">
+      <input type="text" id="inputCode" placeholder="RTV-XXXX" maxlength="12" autocomplete="off" inputmode="text">
       <div class="field-error" id="errorCode"></div>
     </div>
     <a href="#" id="changeCodeLink" class="change-code-link" style="display:none" onclick="event.preventDefault();clearQrCode()">Cambiar código</a>
@@ -1207,7 +1207,7 @@ function submitAndSpin() {
   var phone = phoneInput.value.replace(/\D/g, '');
   consentRow.classList.remove('error-consent');
 
-  if (!code || code.length < 8) {
+  if (!code || code.length < 4) {
     showFieldError('inputCode', 'errorCode', 'Ingresa el código de tu compra');
     codeInput.focus(); return;
   }
